@@ -1,3 +1,4 @@
+import { apiOrigin } from "./platform";
 import { RECITERS } from "./quran";
 
 /** Only the official verse audio URLs supplied by AlQuran Cloud are accepted. */

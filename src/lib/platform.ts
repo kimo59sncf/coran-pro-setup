@@ -11,7 +11,7 @@ export function isNativeApp(): boolean {
  */
 export function apiOrigin(): string {
   if (!isNativeApp()) return "";
-  const origin = (import.meta.env.VITE_PUBLIC_API_ORIGIN as string | undefined)?.replace(/\/+$/, "") ?? "";
+  const origin = (import.meta.env['VITE_PUBLIC_API_ORIGIN'] as string | undefined)?.replace(/\/+$/, "") ?? "";
   if (!origin.startsWith("https://")) throw new Error("VITE_PUBLIC_API_ORIGIN must be an https URL for the native app");
   return origin;
 }

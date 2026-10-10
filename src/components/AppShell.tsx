@@ -9,6 +9,8 @@ import { usePlayer } from "@/lib/player-context";
 import { RECITERS, surah, surahName } from "@/lib/quran";
 import { useOnline } from "@/lib/offline";
 import { useStore } from "@/lib/store";
+import { initNative } from "@/lib/native";
+import { isNativeApp } from "@/lib/platform";
 
 const tabs: { to: "/" | "/surahs" | "/search" | "/favorites" | "/settings"; icon: typeof Home; k: TKey }[] = [
   { to: "/", icon: Home, k: "home" },
