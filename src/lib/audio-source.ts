@@ -14,5 +14,5 @@ export function officialAudioUrl(value: string): string | null {
 export function audioDownloadUrl(value: string): string {
   const url = officialAudioUrl(value);
   if (!url) throw new Error("invalid-audio");
-  return `/api/public/quran-audio?url=${encodeURIComponent(url)}`;
+  return `${apiOrigin()}/api/public/quran-audio?url=${encodeURIComponent(url)}`;
 }
