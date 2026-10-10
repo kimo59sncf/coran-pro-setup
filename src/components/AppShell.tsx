@@ -25,11 +25,16 @@ export function AppShell({ children }: { children: ReactNode }) {
     document.documentElement.dir = dir;
   }, [lang, dir]);
   useEffect(() => {
-    // Offline support only on the real site (never inside the editor preview).
+    let cleanup = () => {};
+    void initNative().then((fn) => { cleanup = fn; });
+    return () => cleanup();
+  }, []);
+  useEffect(() => {
+    // Offline support only on the real site (never inside the editor preview or the native app).
     const inFrame = window.self !== window.top;
     const preview = /id-preview|lovableproject|localhost/.test(location.hostname);
     if (!("serviceWorker" in navigator)) return;
-    if (inFrame || preview || !import.meta.env.PROD) {
+    if (inFrame || preview || isNativeApp() || !import.meta.env.PROD) {
       navigator.serviceWorker.getRegistrations().then((rs) => rs.forEach((r) => r.unregister()));
       return;
     }
