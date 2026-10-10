@@ -11,7 +11,12 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "build:mobile": "vite build --config ./vite.mobile.config.ts --mode mobile && rm -rf dist-mobile && cp -r dist/client dist-mobile && node scripts/check-mobile-build.mjs",
+    "cap:sync": "bun run build:mobile && cap sync",
+    "cap:android": "cap open android",
+    "cap:ios": "cap open ios",
+    "cap:assets": "capacitor-assets generate --iconBackgroundColor \"#3E6B58\" --splashBackgroundColor \"#3E6B58\""
   },
   "overrides": {
     "rolldown": "1.2.1"
@@ -105,5 +110,6 @@
     "typescript-eslint": "^8.56.1",
     "vite": "8.1.5",
     "vitest": "^4.1.10"
-  }
+  },
+  "version": "1.0.0"
 }
