@@ -10,6 +10,9 @@ import {
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 
+import { AppShell } from "@/components/AppShell";
+import { PlayerProvider } from "@/lib/player";
+import { Toaster } from "sonner";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
@@ -35,10 +38,31 @@ function NotFoundComponent() {
   );
 }
 
+const CHUNK_ERROR = /Importing a module script failed|Failed to fetch dynamically imported module|error loading dynamically imported module/i;
+
+function reloadOnceForStaleChunk() {
+  if (typeof window === "undefined") return false;
+  const key = "cpf-chunk-reload";
+  const last = Number(sessionStorage.getItem(key) || 0);
+  if (Date.now() - last < 10000) return false;
+  sessionStorage.setItem(key, String(Date.now()));
+  window.location.reload();
+  return true;
+}
+
+if (typeof window !== "undefined") {
+  window.addEventListener("vite:preloadError", (e) => {
+    e.preventDefault();
+    reloadOnceForStaleChunk();
+  });
+}
+
 function ErrorComponent({ error, reset }: ErrorComponentProps) {
   console.error(error);
   const router = useRouter();
   useEffect(() => {
+    const msg = error instanceof Error ? error.message : String(error);
+    if (CHUNK_ERROR.test(msg) && reloadOnceForStaleChunk()) return;
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
   }, [error]);
 
@@ -78,21 +102,20 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
+      { title: "CoranProFree" },
+      { name: "theme-color", content: "#3E6B58" },
     ],
     links: [
       {
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" },
+      { rel: "icon", href: "/favicon.png", type: "image/png" },
+      { rel: "manifest", href: "/manifest.webmanifest" },
+      { rel: "apple-touch-icon", href: "/icon-512.png" },
     ],
   }),
   shellComponent: RootShell,
@@ -121,7 +144,12 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <PlayerProvider>
+        <AppShell>
+          <Outlet />
+        </AppShell>
+        <Toaster position="top-center" />
+      </PlayerProvider>
     </QueryClientProvider>
   );
 }
