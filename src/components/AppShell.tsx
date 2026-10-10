@@ -44,7 +44,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   }, []);
   const online = useOnline();
   return (
-    <div className="mx-auto min-h-screen max-w-3xl pb-40">
+    <div className="mx-auto min-h-screen max-w-3xl pb-40 pt-[env(safe-area-inset-top)]">
       {!online && (
         <div role="status" className="sticky top-0 z-40 bg-gold px-4 py-2 text-center text-xs font-medium text-gold-foreground">
           {t("offlineBanner")}
