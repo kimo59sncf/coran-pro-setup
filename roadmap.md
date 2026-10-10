@@ -15,3 +15,5 @@
 - [ ] 13 Islamic AI V1.2
 - [ ] 14 Production hardening
 - [ ] 15 Final audit
+- [x] Mobile: Capacitor Android + iOS (com.coranprofree.app), relay CORS, offline audio verified
+- [ ] Mobile: native device builds/signing/store submission (needs Android Studio, Xcode, store accounts)

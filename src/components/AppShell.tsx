@@ -9,6 +9,8 @@ import { usePlayer } from "@/lib/player-context";
 import { RECITERS, surah, surahName } from "@/lib/quran";
 import { useOnline } from "@/lib/offline";
 import { useStore } from "@/lib/store";
+import { initNative } from "@/lib/native";
+import { isNativeApp } from "@/lib/platform";
 
 const tabs: { to: "/" | "/surahs" | "/search" | "/favorites" | "/settings"; icon: typeof Home; k: TKey }[] = [
   { to: "/", icon: Home, k: "home" },
@@ -25,11 +27,16 @@ export function AppShell({ children }: { children: ReactNode }) {
     document.documentElement.dir = dir;
   }, [lang, dir]);
   useEffect(() => {
-    // Offline support only on the real site (never inside the editor preview).
+    let cleanup = () => {};
+    void initNative().then((fn) => { cleanup = fn; });
+    return () => cleanup();
+  }, []);
+  useEffect(() => {
+    // Offline support only on the real site (never inside the editor preview or the native app).
     const inFrame = window.self !== window.top;
     const preview = /id-preview|lovableproject|localhost/.test(location.hostname);
     if (!("serviceWorker" in navigator)) return;
-    if (inFrame || preview || !import.meta.env.PROD) {
+    if (inFrame || preview || isNativeApp() || !import.meta.env.PROD) {
       navigator.serviceWorker.getRegistrations().then((rs) => rs.forEach((r) => r.unregister()));
       return;
     }
@@ -37,7 +44,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   }, []);
   const online = useOnline();
   return (
-    <div className="mx-auto min-h-screen max-w-3xl pb-40">
+    <div className="mx-auto min-h-screen max-w-3xl pb-40 pt-[env(safe-area-inset-top)]">
       {!online && (
         <div role="status" className="sticky top-0 z-40 bg-gold px-4 py-2 text-center text-xs font-medium text-gold-foreground">
           {t("offlineBanner")}
