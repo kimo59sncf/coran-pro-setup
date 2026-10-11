@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { LANGS, useT } from "@/lib/i18n";
 import { defaultState, setState, useStore } from "@/lib/store";
 import { RECITERS, TRANSLATIONS } from "@/lib/quran";
@@ -70,7 +70,8 @@ function SettingsPage() {
         </Section>
         <div className="rounded-2xl bg-muted p-4 text-sm">
           <p>{t("privacy")}</p>
-          <button className="mt-2 font-semibold text-destructive" onClick={() => setState(() => ({ ...defaultState, lang: st.lang }))}>{t("clearData")}</button>
+          <Link to="/privacy" className="mt-2 inline-block font-semibold text-primary underline">{t("privacyPolicy")}</Link>
+          <button className="mt-2 block font-semibold text-destructive" onClick={() => setState(() => ({ ...defaultState, lang: st.lang }))}>{t("clearData")}</button>
         </div>
       </div>
     </div>
