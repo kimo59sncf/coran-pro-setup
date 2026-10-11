@@ -16,7 +16,7 @@ const dict = {
     speed: "Vitesse", repeat: "Répétition", repeatOff: "Non", repeatAyah: "Verset", repeatSurah: "Sourate",
     sources: "Sources", loading: "Chargement…", error: "Impossible de charger. Vérifiez votre connexion.", retry: "Réessayer",
     stats: "Vos statistiques", sessions: "sessions", opened: "sourates ouvertes", playSurah: "Écouter la sourate", shuffle: "Lecture aléatoire", surpriseMe: "Sourate surprise", nowPlaying: "En lecture",
-    clearData: "Effacer mes données locales", privacy: "Vos données restent sur cet appareil.",
+    clearData: "Effacer mes données locales", privacy: "Vos données restent sur cet appareil.", privacyPolicy: "Règles de confidentialité",
   },
   en: {
     download: "Download surah", removeDownload: "Delete download", downloaded: "Downloaded", removeFavorite: "Remove from favorites", addFavorite: "Add to favorites", playlist: "Playlist", addPlaylist: "Add to playlist", removePlaylist: "Remove from playlist", playPlaylist: "Play playlist", nextSurah: "Next surah", autoAdvance: "Continue to next surah", favoriteReciters: "Favorite reciters", favoriteSurahs: "Favorite surahs", downloads: "Downloads", downloadDone: "Surah downloaded", close: "Close",
@@ -33,7 +33,7 @@ const dict = {
     speed: "Speed", repeat: "Repeat", repeatOff: "Off", repeatAyah: "Ayah", repeatSurah: "Surah",
     sources: "Sources", loading: "Loading…", error: "Couldn't load. Check your connection.", retry: "Retry",
     stats: "Your stats", sessions: "sessions", opened: "surahs opened", playSurah: "Play surah", shuffle: "Shuffle", surpriseMe: "Surprise me", nowPlaying: "Now playing",
-    clearData: "Clear my local data", privacy: "Your data stays on this device.",
+    clearData: "Clear my local data", privacy: "Your data stays on this device.", privacyPolicy: "Privacy policy",
   },
   ar: {
     download: "تنزيل السورة", removeDownload: "حذف التنزيل", downloaded: "تم التنزيل", removeFavorite: "إزالة من المفضلة", addFavorite: "إضافة إلى المفضلة", playlist: "قائمة التشغيل", addPlaylist: "إضافة إلى قائمة التشغيل", removePlaylist: "إزالة من قائمة التشغيل", playPlaylist: "تشغيل القائمة", nextSurah: "السورة التالية", autoAdvance: "متابعة السور", favoriteReciters: "القراء المفضلون", favoriteSurahs: "السور المفضلة", downloads: "التنزيلات", downloadDone: "تم تنزيل السورة", close: "إغلاق",
@@ -50,7 +50,7 @@ const dict = {
     speed: "السرعة", repeat: "التكرار", repeatOff: "بدون", repeatAyah: "آية", repeatSurah: "سورة",
     sources: "المصادر", loading: "جارٍ التحميل…", error: "تعذر التحميل. تحقق من الاتصال.", retry: "إعادة المحاولة",
     stats: "إحصاءاتك", sessions: "جلسات", opened: "سور مفتوحة", playSurah: "استمع إلى السورة", shuffle: "تشغيل عشوائي", surpriseMe: "سورة مفاجأة", nowPlaying: "قيد التشغيل",
-    clearData: "مسح بياناتي المحلية", privacy: "تبقى بياناتك على هذا الجهاز.",
+    clearData: "مسح بياناتي المحلية", privacy: "تبقى بياناتك على هذا الجهاز.", privacyPolicy: "سياسة الخصوصية",
   },
 } as const;
 
