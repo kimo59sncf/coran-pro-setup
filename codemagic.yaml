@@ -5,6 +5,53 @@
 # Project: Capacitor 8 with Swift Package Manager -> no .xcworkspace, no Podfile.
 #   Xcode project: ios/App/App.xcodeproj   Scheme: App (shared)
 workflows:
+  # FREE Linux CI: static + build validations only. No Mac, no Apple, no secret.
+  # Produces NO IPA. Safe to run on every push/PR before paying Apple Developer.
+  validate:
+    name: CoranProFree Validate (no Apple)
+    max_build_duration: 30
+    instance_type: linux_x2
+    environment:
+      node: 22
+    triggering:
+      events:
+        - push
+        - pull_request
+      branch_patterns:
+        - pattern: "*"
+          include: true
+    scripts:
+      - name: Install bun
+        script: |
+          curl -fsSL https://bun.sh/install | bash
+          echo "$HOME/.bun/bin" >> $CM_ENV
+      - name: Install dependencies
+        script: bun install --frozen-lockfile || bun install
+      - name: TypeScript
+        script: bunx tsc --noEmit
+      - name: Unit tests
+        script: bun run test
+      - name: Build mobile web bundle
+        script: bunx vite build --config ./vite.mobile.config.ts --mode mobile
+      - name: Assemble dist-mobile (SPA output -> dist-mobile)
+        script: |
+          rm -rf dist-mobile
+          cp -r .output/public dist-mobile
+      - name: Validate mobile bundle (no dev URL / no secret)
+        script: node scripts/check-mobile-build.mjs
+      - name: Validate codemagic.yaml parses and has iOS project config
+        script: |
+          node -e "const y=require('js-yaml');const fs=require('fs');const d=y.load(fs.readFileSync('codemagic.yaml','utf8'));const w=d.workflows||{};if(!w['ios-appstore'])throw new Error('ios-appstore workflow missing');if(!/ios\\/App\\/App\\.xcodeproj/.test(JSON.stringify(w['ios-appstore'])))throw new Error('ios-appstore must target ios/App/App.xcodeproj');console.log('codemagic.yaml OK: ios-appstore present, iOS project target OK');"
+      - name: Verify iOS config invariants (Bundle ID, SPM, background audio)
+        script: |
+          set -e
+          grep -q "com.coranprofree.app" ios/App/App/App/Info.plist || \
+            grep -rq "com.coranprofree.app" ios/App/App.xcodeproj/project.pbxproj
+          grep -q "<string>audio</string>" ios/App/App/Info.plist
+          test -f ios/App/CapApp-SPM/Package.swift
+          test -f ios/App/App.xcodeproj/xcshareddata/xcschemes/App.xcscheme
+          echo "iOS invariants OK: Bundle ID, UIBackgroundModes=audio, SPM, shared App scheme"
+
   ios-appstore:
     name: CoranProFree iOS App Store
     max_build_duration: 60
