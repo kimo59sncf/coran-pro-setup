@@ -98,3 +98,36 @@ describe("Offline downloads", () => {
     expect(await isDownloaded(1, "fr", "ar.alafasy")).toBe(false);
   });
 });
+import { dedupe, defaultState as baseState, toggleFavoriteSurah, favoriteSurahsOf } from "@/lib/store";
+describe("favorites without duplicates", () => {
+  it("keeps favorites per reciter and removes duplicates", () => {
+    let s = { ...baseState, ...toggleFavoriteSurah(baseState, "ar.alafasy", 2) };
+    s = { ...s, ...toggleFavoriteSurah(s, "ar.husary", 3) };
+    expect(favoriteSurahsOf(s, "ar.alafasy")).toEqual([2]);
+    expect(favoriteSurahsOf(s, "ar.husary")).toEqual([3]);
+    const clean = dedupe({ ...s, playlist: [1, 1, 2], favoriteSurahs: { "ar.alafasy": [2, 2, 5] } });
+    expect(clean.playlist).toEqual([1, 2]);
+    expect(favoriteSurahsOf(clean, "ar.alafasy")).toEqual([2, 5]);
+  });
+});
+
+import { togglePlaylist, playlistReciter } from "@/lib/store";
+import { playlistStart } from "@/lib/playback";
+describe("personal playlist", () => {
+  it("remembers the reciter chosen for each surah", () => {
+    let s = { ...baseState, reciter: "ar.husary" };
+    s = { ...s, ...togglePlaylist(s, 2, "ar.husary") };
+    s = { ...s, reciter: "ar.alafasy", ...togglePlaylist({ ...s, reciter: "ar.alafasy" }, 18, "ar.alafasy") };
+    expect(playlistReciter(s, 2)).toBe("ar.husary");
+    expect(playlistReciter(s, 18)).toBe("ar.alafasy");
+    s = { ...s, ...togglePlaylist(s, 2, "ar.alafasy") }; // re-assign, no duplicate
+    expect(s.playlist).toEqual([2, 18]);
+    expect(playlistReciter(s, 2)).toBe("ar.alafasy");
+  });
+  it("shuffle never repeats the current surah and starts randomly", () => {
+    expect(followingSurah(2, [2, 18, 36], false, true, () => 0)).toBe(18);
+    expect(followingSurah(2, [2, 18, 36], false, true, () => 0.99)).toBe(36);
+    expect(playlistStart([2, 18, 36], true, () => 0.99)).toBe(36);
+    expect(playlistStart([2, 18, 36], false)).toBe(2);
+  });
+});
