@@ -45,7 +45,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   }, []);
   const online = useOnline();
   return (
-    <div className="mx-auto min-h-screen max-w-3xl pb-40 pt-[env(safe-area-inset-top)]">
+    <div className="mx-auto min-h-screen max-w-3xl pb-[calc(11rem+env(safe-area-inset-bottom))] pt-[env(safe-area-inset-top)]">
       {!online && (
         <div role="status" className="sticky top-0 z-40 bg-gold px-4 py-2 text-center text-xs font-medium text-gold-foreground">
           {t("offlineBanner")}
@@ -60,9 +60,11 @@ export function AppShell({ children }: { children: ReactNode }) {
               <Link
                 to={to}
                 activeOptions={{ exact: to === "/" }}
-                className="flex flex-col items-center gap-1 px-3 py-2.5 text-[11px] font-medium text-muted-foreground data-[status=active]:text-primary"
+                className="group flex min-h-14 min-w-14 flex-col items-center justify-center gap-0.5 px-2 py-1.5 text-[11px] font-medium text-muted-foreground transition-colors data-[status=active]:font-semibold data-[status=active]:text-gold"
               >
-                <Icon className="h-5 w-5" aria-hidden />
+                <span className="grid h-7 w-12 place-items-center rounded-full transition-colors group-data-[status=active]:bg-gold/15">
+                  <Icon className="h-5 w-5" aria-hidden />
+                </span>
                 {t(k)}
               </Link>
             </li>
@@ -75,8 +77,8 @@ export function AppShell({ children }: { children: ReactNode }) {
 
 export function PageHeader({ title, children }: { title: string; children?: ReactNode }) {
   return (
-    <header className="px-5 pb-4 pt-8">
-      <h1 className="text-4xl font-semibold">{title}</h1>
+    <header className="px-5 pb-4 pt-6 sm:pt-8">
+      <h1 className="text-[2.5rem] font-semibold leading-tight">{title}</h1>
       {children}
     </header>
   );
@@ -89,18 +91,18 @@ export function SurahRow({ n }: { n: number }) {
   const { saved, busy } = useDownload(n, lang, reciter);
   const s = surah(n);
   return (
-    <div className="flex flex-wrap items-center gap-x-2 border-b px-3 py-2">
-    <Link to="/surah/$id" params={{ id: String(n) }} className="flex min-w-0 flex-1 items-center gap-3 py-2 transition-colors hover:bg-card">
+    <div className="mx-2 my-1 flex items-center gap-x-1 rounded-2xl px-2 py-1 transition-colors hover:bg-card/70">
+    <Link to="/surah/$id" params={{ id: String(n) }} className="flex min-h-14 min-w-0 flex-1 items-center gap-3 rounded-xl py-2 focus-visible:outline-2 focus-visible:outline-ring">
       <span className="grid h-10 w-10 shrink-0 rotate-45 place-items-center rounded-lg border border-gold/50 text-xs font-semibold text-gold">
         <span className="-rotate-45">{num(n)}</span>
       </span>
        <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5 font-semibold">
-          <span className="truncate">{surahName(s, lang)}</span>
+          <span className="line-clamp-2 leading-snug" title={surahName(s, lang)}>{surahName(s, lang)}</span>
           {favorite && <Heart className="h-4 w-4 shrink-0 text-favorite" fill="currentColor" role="img" aria-label={t("favorite")} />}
           {saved && <CloudCheck className="h-4 w-4 shrink-0 text-success" role="img" aria-label={t("downloaded")} />}
         </div>
-        <div className="text-xs text-muted-foreground">
+        <div className="mt-0.5 text-xs text-muted-foreground">
           {lang === "en" && `${s.en} · `}{num(s.ayahs)} {t("ayahs")} · {t(s.type === "Meccan" ? "meccan" : "medinan")}
         </div>
       </div>
