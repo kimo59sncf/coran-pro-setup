@@ -15,5 +15,12 @@
 - [ ] 13 Islamic AI V1.2
 - [ ] 14 Production hardening
 - [ ] 15 Final audit
-- [x] Mobile: Capacitor Android + iOS (com.coranprofree.app), relay CORS, offline audio verified
-- [ ] Mobile: native device builds/signing/store submission (needs Android Studio, Xcode, store accounts)
+
+## Demandes en cours
+- [x] Accueil : 114 sourates, liste par récitateur (toutes / favoris / hors ligne)
+- [x] Favoris : sections distinctes hors ligne / favoris / playlist, sans doublons
+- [x] Récupérer la dernière version GitHub (kimo59sncf/coran-pro-setup, branche mobile)
+- [x] Playlist sur l'accueil
+- [x] Lecteur plein écran + mini-player : fond dégradé avec image du récitateur (palette émeraude/or/nuit)
+- [ ] Ajouter le récitateur Ahmed Khedr — bloqué : aucune source audio verset par verset vérifiée
+- [x] Moderniser le visuel (Cormorant Garamond + Karla)
