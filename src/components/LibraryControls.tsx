@@ -13,7 +13,7 @@ export function SurahActions({ n, favorite, saved, busy }: { n: number; favorite
   const reciter = useStore((s) => s.reciter);
   const inPlaylist = useStore((s) => s.playlist.includes(n) && (s.playlistReciters?.[n] ?? reciter) === reciter);
   const downloadLabel = t(busy ? "saving" : saved ? "removeDownload" : "download");
-  return <div className="flex shrink-0 items-center">
+  return <div className="-me-1 flex shrink-0 items-center">
     <Button size="icon" variant="ghost" title={downloadLabel} aria-label={downloadLabel} aria-pressed={saved} disabled={busy}
       className={saved ? "text-success" : "text-muted-foreground"}
       onClick={async () => { try { if (saved) await removeDownload(n, lang, reciter); else { await downloadSurah(n, lang, reciter); toast.success(t("downloadDone")); } } catch { toast.error(t("error")); } }}>
@@ -24,7 +24,7 @@ export function SurahActions({ n, favorite, saved, busy }: { n: number; favorite
       <Heart fill={favorite ? "currentColor" : "none"} />
     </Button>
     <Button size="icon" variant="ghost" title={t(inPlaylist ? "removePlaylist" : "addPlaylist")} aria-label={t(inPlaylist ? "removePlaylist" : "addPlaylist")} aria-pressed={inPlaylist}
-      className={inPlaylist ? "text-primary" : "text-muted-foreground"} onClick={() => setState((s) => togglePlaylist(s, n, reciter))}>
+      className={inPlaylist ? "text-gold" : "text-muted-foreground"} onClick={() => setState((s) => togglePlaylist(s, n, reciter))}>
       {inPlaylist ? <ListChecks /> : <ListPlus />}
     </Button>
   </div>;

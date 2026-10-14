@@ -44,8 +44,8 @@ function Favorites() {
         <h2 className="px-2 pb-2 text-xl font-semibold">{t("reciter")}</h2>
         <ReciterPicker />
       </section>
-      <Section icon={<Heart className="h-5 w-5 text-favorite" fill="currentColor" />} title={t("favoriteSurahs")} count={num(favoriteSurahs.length)} list={favoriteSurahs} empty={t("noResults")} />
-      <Section icon={<CloudCheck className="h-5 w-5 text-success" fill="currentColor" />} title={t("offlineAvailable")} count={num(downloads.length)} list={downloads} empty={t("noResults")} />
+      <Section icon={<Heart className="h-5 w-5 text-favorite" fill="currentColor" />} title={t("favoriteSurahs")} count={num(favoriteSurahs.length)} list={favoriteSurahs} empty={t("emptyFavSurahs")} />
+      <Section icon={<CloudCheck className="h-5 w-5 text-success" fill="currentColor" />} title={t("offlineAvailable")} count={num(downloads.length)} list={downloads} empty={t("emptyOffline")} />
       <Section icon={<ListMusic className="h-5 w-5 text-gold" />} title={t("playlist")} count={num(playlist.length)} list={playlist} empty={t("emptyPlaylist")}
         action={<Button variant="outline" size="sm" disabled={!playlist.length} onClick={() => player.playPlaylist()}><Play />{t("playPlaylist")}</Button>} />
       <section className="mb-6 px-5"><h2 className="pb-3 text-xl font-semibold">{t("favoriteReciters")}</h2><ReciterPicker favoritesOnly />{!favoriteReciters.length && <p className="text-sm text-muted-foreground">{t("noResults")}</p>}</section>
@@ -60,7 +60,7 @@ function Favorites() {
             const [s = 1, a = 1] = k.split(":").map(Number);
             return (
               <li key={k}>
-                <Link to="/surah/$id" params={{ id: String(s) }} hash={`a${a}`} className="flex items-center gap-3 rounded-xl px-3 py-3 hover:bg-card">
+                <Link to="/surah/$id" params={{ id: String(s) }} hash={`a${a}`} className="flex min-h-12 items-center gap-3 rounded-xl px-3 py-3 hover:bg-card">
                   <span className="flex-1 font-semibold">{surah(s).tr} <span className="font-normal text-muted-foreground">· {t("ayah")} {num(a)}</span></span>
                   {favs.includes(k) && <Heart className="h-4 w-4 text-favorite" fill="currentColor" aria-label={t("favorite")} />}
                   {bms.includes(k) && <Bookmark className="h-4 w-4 text-gold" fill="currentColor" aria-label={t("bookmark")} />}
@@ -76,13 +76,13 @@ function Favorites() {
 
 function Section({ icon, title, count, list, empty, action }: { icon: React.ReactNode; title: string; count: string; list: number[]; empty: string; action?: React.ReactNode }) {
   return (
-    <section className="mx-3 mb-5 overflow-hidden rounded-2xl border bg-card shadow-soft">
-      <div className="flex items-center gap-2 border-b px-4 py-3">
+    <section className="surface mx-3 mb-4 overflow-hidden">
+      <div className="flex min-h-14 items-center gap-2 border-b px-4 py-2">
         {icon}<h2 className="flex-1 text-xl font-semibold">{title}</h2>
-        <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-semibold text-muted-foreground">{count}</span>{action}
+        <span className="min-w-7 rounded-full bg-muted px-2.5 text-center py-0.5 text-xs font-semibold text-muted-foreground">{count}</span>{action}
       </div>
       {list.map((n) => <SurahRow n={n} key={n} />)}
-      {!list.length && <p className="px-4 py-4 text-sm text-muted-foreground">{empty}</p>}
+      {!list.length && <div className="flex items-center gap-3 px-4 py-5 text-sm text-muted-foreground"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-muted opacity-70">{icon}</span><p>{empty}</p></div>}
     </section>
   );
 }

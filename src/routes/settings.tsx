@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { Check } from "lucide-react";
 import { LANGS, useT } from "@/lib/i18n";
 import { defaultState, setState, useStore } from "@/lib/store";
 import { RECITERS, TRANSLATIONS } from "@/lib/quran";
@@ -21,7 +22,9 @@ export const Route = createFileRoute("/settings")({
   component: SettingsPage,
 });
 
-const chip = (on: boolean) => `rounded-full border px-4 py-2 text-sm font-medium transition-colors ${on ? "border-primary bg-primary text-primary-foreground" : "bg-card"}`;
+function Chip({ on, onClick, children }: { on: boolean; onClick: () => void; children: React.ReactNode }) {
+  return <button type="button" role="radio" aria-checked={on} className="chip" onClick={onClick}>{on && <Check className="h-4 w-4" aria-hidden />}{children}</button>;
+}
 
 function SettingsPage() {
   const { t, num, lang } = useT();
@@ -32,31 +35,30 @@ function SettingsPage() {
       <PageHeader title={t("settings")} />
       <div className="space-y-4 px-5">
         <Section title={t("language")}>
-          {LANGS.map((l) => <button key={l.id} className={chip(st.lang === l.id)} onClick={() => setState(() => ({ lang: l.id }))}>{l.label}</button>)}
+          <Group label={t("language")}>{LANGS.map((l) => <Chip key={l.id} on={st.lang === l.id} onClick={() => setState(() => ({ lang: l.id }))}>{l.label}</Chip>)}</Group>
         </Section>
         <Section title={t("reciter")}>
           <ReciterPicker />
         </Section>
-        <Section title={t("speed")}>
-          {[0.5, 0.75, 1, 1.25, 1.5, 2].map((v) => <button key={v} className={chip(p.speed === v)} onClick={() => p.setSpeed(v)}>{num(v)}×</button>)}
-        </Section>
-        <Section title={t("repeat")}>
-          {(["off", "ayah", "surah"] as const).map((r) => <button key={r} className={chip(p.repeat === r)} onClick={() => p.setRepeat(r)}>{t(r === "off" ? "repeatOff" : r === "ayah" ? "repeatAyah" : "repeatSurah")}</button>)}
-        </Section>
-        <label className="flex items-center justify-between gap-4 rounded-2xl border bg-card p-4">
-          <span className="font-medium">{t("autoAdvance")}</span>
-          <input type="checkbox" checked={st.autoAdvance} onChange={(e) => setState(() => ({ autoAdvance: e.target.checked }))} className="h-5 w-5 accent-primary" />
-        </label>
-        <Section title={t("fontSize")}>
-          <input type="range" min={22} max={48} value={st.fontSize} onChange={(e) => setState(() => ({ fontSize: Number(e.target.value) }))} className="w-full accent-primary" aria-label={t("fontSize")} />
-          <p dir="rtl" className="font-quran w-full text-right" style={{ fontSize: st.fontSize }}>ٱلْحَمْدُ لِلَّهِ رَبِّ ٱلْعَٰلَمِينَ</p>
-        </Section>
-        {TRANSLATIONS[lang] && (
-          <label className="flex items-center justify-between rounded-2xl border bg-card p-4">
-            <span className="font-medium">{t("translation")}</span>
-            <input type="checkbox" checked={st.showTranslation} onChange={(e) => setState(() => ({ showTranslation: e.target.checked }))} className="h-5 w-5 accent-primary" />
+        <Section title={t("audioPlayback")}>
+          <Sub title={t("speed")}>{[0.5, 0.75, 1, 1.25, 1.5, 2].map((v) => <Chip key={v} on={p.speed === v} onClick={() => p.setSpeed(v)}>{num(v)}×</Chip>)}</Sub>
+          <Sub title={t("repeat")}>{(["off", "ayah", "surah"] as const).map((r) => <Chip key={r} on={p.repeat === r} onClick={() => p.setRepeat(r)}>{t(r === "off" ? "repeatOff" : r === "ayah" ? "repeatAyah" : "repeatSurah")}</Chip>)}</Sub>
+          <label className="flex min-h-11 w-full items-center justify-between gap-4 border-t pt-3">
+            <span className="font-medium">{t("autoAdvance")}</span>
+            <input type="checkbox" checked={st.autoAdvance} onChange={(e) => setState(() => ({ autoAdvance: e.target.checked }))} className="h-6 w-6 accent-primary" />
           </label>
-        )}
+        </Section>
+        <Section title={t("readingLearning")}>
+          <p className="w-full text-sm font-medium text-muted-foreground">{t("fontSize")}</p>
+          <input type="range" min={22} max={48} value={st.fontSize} onChange={(e) => setState(() => ({ fontSize: Number(e.target.value) }))} className="h-11 w-full accent-primary" aria-label={t("fontSize")} />
+          <p dir="rtl" className="font-quran w-full text-right" style={{ fontSize: st.fontSize }}>ٱلْحَمْدُ لِلَّهِ رَبِّ ٱلْعَٰلَمِينَ</p>
+          {TRANSLATIONS[lang] && (
+            <label className="flex min-h-11 w-full items-center justify-between gap-4 border-t pt-3">
+              <span className="font-medium">{t("translation")}</span>
+              <input type="checkbox" checked={st.showTranslation} onChange={(e) => setState(() => ({ showTranslation: e.target.checked }))} className="h-6 w-6 accent-primary" />
+            </label>
+          )}
+        </Section>
         <OfflineSection />
         <Section title={t("stats")}>
           <p className="text-sm text-muted-foreground">{num(st.stats.sessions)} {t("sessions")} · {num(st.stats.surahsOpened.length)} {t("opened")}</p>
@@ -68,10 +70,10 @@ function SettingsPage() {
             <li>Audio & API : Islamic Network (alquran.cloud)</li>
           </ul>
         </Section>
-        <div className="rounded-2xl bg-muted p-4 text-sm">
+        <div className="surface p-4 text-sm">
           <p>{t("privacy")}</p>
-          <Link to="/privacy" className="mt-2 inline-block font-semibold text-primary underline">{t("privacyPolicy")}</Link>
-          <button className="mt-2 block font-semibold text-destructive" onClick={() => setState(() => ({ ...defaultState, lang: st.lang }))}>{t("clearData")}</button>
+          <Link to="/privacy" className="mt-2 inline-flex min-h-11 items-center font-semibold text-gold underline">{t("privacyPolicy")}</Link>
+          <button className="block min-h-11 font-semibold text-destructive" onClick={() => setState(() => ({ ...defaultState, lang: st.lang }))}>{t("clearData")}</button>
         </div>
       </div>
     </div>
@@ -80,9 +82,20 @@ function SettingsPage() {
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-2xl border bg-card p-4">
-      <h2 className="mb-3 text-xl font-semibold">{title}</h2>
+    <section className="surface p-4">
+      <h2 className="mb-3 text-2xl font-semibold">{title}</h2>
       <div className="flex flex-wrap gap-2">{children}</div>
     </section>
   );
+}
+
+function Group({ label, children }: { label: string; children: React.ReactNode }) {
+  return <div role="radiogroup" aria-label={label} className="flex flex-wrap gap-2">{children}</div>;
+}
+
+function Sub({ title, children }: { title: string; children: React.ReactNode }) {
+  return <div className="w-full">
+    <p className="mb-2 text-sm font-medium text-muted-foreground">{title}</p>
+    <Group label={title}>{children}</Group>
+  </div>;
 }
