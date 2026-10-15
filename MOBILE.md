@@ -43,9 +43,11 @@ Garde le keystore en lieu sûr (ou utilise Play App Signing) : sans lui, aucune 
 ## Icônes / splash
 Sources dans `resources/` (icon-only.png 1024², icon-foreground/background.png, splash.png 2732²). Remplace-les puis `bun run cap:assets`.
 
-## Audio en arrière-plan (iOS)
+## Audio en arrière-plan
 
-`UIBackgroundModes` = `audio` est activé dans `ios/App/App/Info.plist` : la lecture continue écran verrouillé ou app en arrière-plan, avec les commandes de lecture sur l'écran verrouillé (Media Session). À déclarer comme tel dans App Store Connect si demandé.
+**iOS** : `UIBackgroundModes` = `audio` est activé dans `ios/App/App/Info.plist` : la lecture continue écran verrouillé ou app en arrière-plan, avec les commandes de lecture sur l'écran verrouillé (Media Session). À déclarer comme tel dans App Store Connect si demandé.
+
+**Android** : `MainActivity.onPause()` relance le WebView juste après sa mise en pause, sinon Android coupe l'audio dès que l'écran s'éteint ou que l'app passe en arrière-plan. Les commandes de lecture restent disponibles via la notification Media Session. Aucune permission supplémentaire n'est nécessaire.
 
 ## Publication
 **Google Play** : compte développeur (25 $) → créer l'app → fiche (captures, description, icône 512, image 1024×500) → Règles de confidentialité (URL) → Sécurité des données (aucune donnée collectée) → classification du contenu → envoyer l'AAB en test interne → production.
