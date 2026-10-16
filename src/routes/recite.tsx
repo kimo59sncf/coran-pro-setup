@@ -42,7 +42,7 @@ const STYLE: Record<WordResult["status"], string> = {
 async function transcribe(file: File, signal?: AbortSignal): Promise<string> {
   const form = new FormData();
   form.append("file", file);
-  const res = await fetch(`${apiOrigin()}/api/public/recite-transcribe`, { method: "POST", body: form, signal });
+  const res = await fetch(`${apiOrigin()}/api/public/recite-transcribe`, { method: "POST", body: form, signal: signal ?? null });
   const body = await res.json().catch(() => ({}));
   if (!res.ok) throw Object.assign(new Error(body.error ?? `Erreur ${res.status}`), { status: res.status });
   return body.text ?? "";
