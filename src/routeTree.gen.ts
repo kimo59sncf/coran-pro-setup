@@ -17,6 +17,7 @@ import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SurahsRouteImport } from './routes/surahs'
 import { Route as SurahIdRouteImport } from './routes/surah.$id'
 import { Route as ApiPublicQuranAudioRouteImport } from './routes/api/public/quran-audio'
+import { Route as ApiPublicReciteTranscribeRouteImport } from './routes/api/public/recite-transcribe'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -58,6 +59,12 @@ const ApiPublicQuranAudioRoute = ApiPublicQuranAudioRouteImport.update({
   path: '/api/public/quran-audio',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicReciteTranscribeRoute =
+  ApiPublicReciteTranscribeRouteImport.update({
+    id: '/api/public/recite-transcribe',
+    path: '/api/public/recite-transcribe',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -68,6 +75,7 @@ export interface FileRoutesByFullPath {
   '/surahs': typeof SurahsRoute
   '/surah/$id': typeof SurahIdRoute
   '/api/public/quran-audio': typeof ApiPublicQuranAudioRoute
+  '/api/public/recite-transcribe': typeof ApiPublicReciteTranscribeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -78,6 +86,7 @@ export interface FileRoutesByTo {
   '/surahs': typeof SurahsRoute
   '/surah/$id': typeof SurahIdRoute
   '/api/public/quran-audio': typeof ApiPublicQuranAudioRoute
+  '/api/public/recite-transcribe': typeof ApiPublicReciteTranscribeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -89,6 +98,7 @@ export interface FileRoutesById {
   '/surahs': typeof SurahsRoute
   '/surah/$id': typeof SurahIdRoute
   '/api/public/quran-audio': typeof ApiPublicQuranAudioRoute
+  '/api/public/recite-transcribe': typeof ApiPublicReciteTranscribeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -101,6 +111,7 @@ export interface FileRouteTypes {
     | '/surahs'
     | '/surah/$id'
     | '/api/public/quran-audio'
+    | '/api/public/recite-transcribe'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -111,6 +122,7 @@ export interface FileRouteTypes {
     | '/surahs'
     | '/surah/$id'
     | '/api/public/quran-audio'
+    | '/api/public/recite-transcribe'
   id:
     | '__root__'
     | '/'
@@ -121,6 +133,7 @@ export interface FileRouteTypes {
     | '/surahs'
     | '/surah/$id'
     | '/api/public/quran-audio'
+    | '/api/public/recite-transcribe'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -132,6 +145,7 @@ export interface RootRouteChildren {
   SurahsRoute: typeof SurahsRoute
   SurahIdRoute: typeof SurahIdRoute
   ApiPublicQuranAudioRoute: typeof ApiPublicQuranAudioRoute
+  ApiPublicReciteTranscribeRoute: typeof ApiPublicReciteTranscribeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -192,6 +206,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicQuranAudioRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/recite-transcribe': {
+      id: '/api/public/recite-transcribe'
+      path: '/api/public/recite-transcribe'
+      fullPath: '/api/public/recite-transcribe'
+      preLoaderRoute: typeof ApiPublicReciteTranscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -204,6 +225,7 @@ const rootRouteChildren: RootRouteChildren = {
   SurahsRoute: SurahsRoute,
   SurahIdRoute: SurahIdRoute,
   ApiPublicQuranAudioRoute: ApiPublicQuranAudioRoute,
+  ApiPublicReciteTranscribeRoute: ApiPublicReciteTranscribeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
