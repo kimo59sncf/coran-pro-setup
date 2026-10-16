@@ -45,6 +45,8 @@
       </array>
     </dict>
 	</dict>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>CoranProFree utilise le micro uniquement pendant la récitation guidée pour vérifier votre lecture. L’audio n’est pas conservé.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>audio</string>
