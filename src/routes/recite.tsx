@@ -10,12 +10,12 @@ import { accuracy, alignRecitation, splitWords, type WordResult } from "@/lib/re
 import { startRecorder, type Recorder } from "@/lib/recorder";
 import { apiOrigin } from "@/lib/platform";
 
-type Search = { s?: number; a?: number };
+type Search = { s?: number | undefined; a?: number | undefined };
 
 export const Route = createFileRoute("/recite")({
   validateSearch: (q: Record<string, unknown>): Search => ({
-    s: Number(q.s) >= 1 && Number(q.s) <= 114 ? Number(q.s) : undefined,
-    a: Number(q.a) >= 1 ? Number(q.a) : undefined,
+    s: Number(q["s"]) >= 1 && Number(q["s"]) <= 114 ? Number(q["s"]) : undefined,
+    a: Number(q["a"]) >= 1 ? Number(q["a"]) : undefined,
   }),
   head: () => ({
     meta: [

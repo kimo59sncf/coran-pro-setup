@@ -18,7 +18,7 @@ export const Route = createFileRoute("/api/public/recite-transcribe")({
       const json = (body: unknown, status: number) => new Response(JSON.stringify(body), { status, headers: { ...h, "Content-Type": "application/json" } });
       const len = Number(request.headers.get("content-length") ?? 0);
       if (len > MAX) return json({ error: "Audio trop long" }, 413);
-      const key = process.env.LOVABLE_API_KEY;
+      const key = process.env['LOVABLE_API_KEY'];
       if (!key) return json({ error: "Service non configuré" }, 500);
       const form = await request.formData().catch(() => null);
       const file = form?.get("file");

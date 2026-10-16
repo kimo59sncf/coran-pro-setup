@@ -2,7 +2,7 @@ import { normalize } from "./quran";
 
 /** Pure, browser-safe alignment of a spoken transcript against verse words (Tarteel-like). */
 export type WordStatus = "pending" | "correct" | "close" | "wrong" | "missed";
-export type WordResult = { word: string; status: WordStatus; heard?: string };
+export type WordResult = { word: string; status: WordStatus; heard?: string | undefined };
 
 // Arabic-only normalisation: diacritics, tatweel, letter forms; also drop Quranic stop marks.
 export const normWord = (w: string) =>
