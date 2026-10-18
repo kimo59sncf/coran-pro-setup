@@ -17,6 +17,9 @@
 - [ ] 15 Final audit
 
 ## Demandes en cours
+- [ ] Réduire les coupures audio entre les versets en conservant leur synchronisation
+- [ ] Afficher une page complète du Mushaf dans Réciter avec sélection et analyse du verset
+- [ ] Vérifier la continuité audio et la lecture de page complète
 - [x] Accueil : 114 sourates, liste par récitateur (toutes / favoris / hors ligne)
 - [x] Favoris : sections distinctes hors ligne / favoris / playlist, sans doublons
 - [x] Récupérer la dernière version GitHub (kimo59sncf/coran-pro-setup, branche mobile)
