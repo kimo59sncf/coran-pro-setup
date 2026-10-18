@@ -1,35 +1,28 @@
-# CoranProFree → Android + iOS (Capacitor)
+# Lecture fluide et récitation sur page complète
 
-## A. Audit (état actuel)
-- TanStack Start v1 (React 19, Vite 7), rendu serveur sur Cloudflare Workers, gestionnaire **bun**.
-- Routes : accueil, sourates, sourate/$id, recherche, favoris, réglages + relais audio serveur `/api/public/quran-audio`.
-- Données utilisateur : localStorage (store versionné) ; audio hors-ligne : Cache API + blob URLs ; service worker désactivé hors site publié.
-- Aucune authentification, aucun paiement, aucune notification, aucune permission native requise.
-- Lovable Cloud activé mais non utilisé par l'app ; seule la clé publique (publishable) est dans le frontend — aucun secret exposé.
+## Lecture audio
+- Conserver les enregistrements officiels et tous les récitateurs actuels.
+- Préparer le verset suivant pendant la lecture du verset courant, au lieu d’attendre sa fin pour charger l’audio.
+- Enchaîner sans chevaucher les récitations ; garder le verset actif, le défilement, les commandes, les répétitions et la playlist synchronisés.
+- Préserver les téléchargements existants et la lecture hors ligne.
 
-### Bloquants identifiés
-1. **Pas de build statique** : l'app est rendue côté serveur ; Capacitor exige un dossier web embarqué (`webDir`).
-2. **Relais audio relatif** (`/api/public/...`) : dans l'app native, il doit viser l'URL publiée HTTPS (coran-pro-setup.lovable.app) + CORS autorisant les origines Capacitor (`capacitor://localhost`, `https://localhost`).
-3. Service worker : à désactiver dans l'app native (inutile, Cache API suffit).
-4. Bouton retour Android, barre d'état, zones sûres (encoche) et liens externes non gérés.
+**Limite :** cette solution supprime l’attente de chargement entre deux versets, mais ne peut garantir zéro silence sur tous les téléphones. Les pauses présentes dans l’enregistrement restent intactes. Une sourate audio complète ne sera pas substituée sans repères de versets vérifiés pour le même enregistrement.
 
-## B. Modifications prévues
-- **Build mobile séparé** : `vite.mobile.config.ts` produisant un SPA statique (`dist-mobile/`, shell `index.html`, prerender/SPA mode TanStack), sans toucher au build web.
-- **Base API** : `VITE_PUBLIC_API_ORIGIN` utilisé uniquement en natif pour le relais audio ; ajout des en-têtes CORS restreints sur la route relais.
-- **Capacitor 7 (stable)** : `@capacitor/core`, `cli`, `android`, `ios`, `app`, `status-bar`, `splash-screen`, `browser`.
-- `capacitor.config.ts` : appId `com.mynichepilot.app`, appName `CoranProFree`, webDir `dist-mobile`, aucun `server.url` (pas de dépendance à un serveur de dev).
-- Module `src/lib/native.ts` (chargé dans un `useEffect`) : retour Android → historique sinon minimiser l'app, couleur barre d'état, masquage splash, liens externes via navigateur système.
-- CSS : `viewport-fit=cover` + `env(safe-area-inset-top)` sur l'en-tête, cibles tactiles ≥ 44px vérifiées sur toutes les pages, portrait + paysage.
-- Icône + splash générés depuis l'icône actuelle via `@capacitor/assets` (sources dans `resources/`, remplaçables).
-- Génération des dossiers `android/` et `ios/` ; versions 1.0.0 / build 1 ; minSdk 23, targetSdk 35 ; iOS 14+ ; orientation portrait+paysage ; aucune permission ajoutée.
-- Scripts : `build:mobile`, `cap:sync`, `cap:android`, `cap:ios`.
-- `MOBILE.md` : commandes exactes (bun), APK/AAB, archive Xcode, TestFlight, publication, incrément des versions.
+## Mode Réciter
+- Afficher la première page de la sourate à son ouverture, avec son titre et le texte arabe disposé en continu, comme une page de Mushaf.
+- Lorsqu’un verset est choisi, afficher sa page complète et le mettre en évidence ; toucher un autre verset permet de le sélectionner.
+- Ajouter les commandes page précédente/suivante et le numéro officiel de page.
+- Conserver la reconnaissance vocale, les couleurs mot par mot et le bilan pour le verset sélectionné.
+- Utiliser uniquement le texte et les numéros de pages fournis par api.alquran.cloud ; ne pas inventer ou réécrire le texte coranique.
+- Présenter une mise en page adaptée à l’écran, sans prétendre reproduire les lignes exactes d’une édition imprimée.
 
-## C. Vérifications
-Tests existants, lint, typecheck, build web inchangé, build mobile, `cap sync`, absence de localhost en production, scan sécurité.
+## Détails techniques
+- Préchargement audio avec annulation des requêtes devenues inutiles et libération des URL temporaires.
+- Étendre les données des versets avec leur numéro de page officiel et ajouter la lecture d’une page entière depuis la même API, avec cache local compatible avec le fonctionnement existant.
+- Traduire les nouvelles commandes en français, anglais et arabe, avec prise en charge droite-à-gauche.
 
-## Limites (action de ta part)
-- Compilation APK/AAB et archive iOS impossibles ici (Android Studio / Xcode sur Mac requis).
-- Comptes Google Play (25 $) et Apple Developer (99 $/an), keystore de signature, certificats Apple.
-- Exporter le projet vers GitHub pour le récupérer en local.
-- Publier le site (le relais audio de l'app mobile en dépend).
+## Vérifications
+- Tests des transitions, du changement de piste, des répétitions et de la sélection de page.
+- Vérifier dans le navigateur la lecture de plusieurs versets, le défilement synchronisé et le choix d’un verset dans une page complète.
+- Contrôler les écrans étroits et l’arabe ; signaler séparément ce qui nécessite un vrai iPhone ou Android.
+- Aucun changement d’architecture mobile, aucune publication et aucun envoi GitHub.
