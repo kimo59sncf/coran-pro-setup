@@ -27,7 +27,7 @@ export const RECITERS = [
   { id: "ar.muhammadjibreel", name: "Muhammad Jibreel", ar: "محمد جبريل" },
 ];
 
-export type Ayah = { n: number; global: number; ar: string; tr?: string; audio: string };
+export type Ayah = { n: number; global: number; ar: string; tr?: string; audio: string; page?: number };
 
 export const surahUrl = (n: number, lang: Lang, reciter: string) => {
   const tr = TRANSLATIONS[lang];
@@ -51,10 +51,11 @@ export const surahQuery = (n: number, lang: Lang, reciter: string) =>
       if (!res || !res.ok) throw new Error("network");
       const { data } = await res.json();
       const [text, audio, trans] = data;
-      return text.ayahs.map((a: { numberInSurah: number; number: number; text: string }, i: number) => ({
+      return text.ayahs.map((a: { numberInSurah: number; number: number; text: string; page?: number }, i: number) => ({
         n: a.numberInSurah,
         global: a.number,
         ar: a.text,
+        page: a.page,
         audio: audio.ayahs[i].audio,
         tr: trans?.ayahs[i]?.text,
       }));
