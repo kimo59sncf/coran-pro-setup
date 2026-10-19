@@ -1,11 +1,11 @@
 import { Fragment, useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { BookOpenText, ChevronLeft, ChevronRight, LoaderCircle } from "lucide-react";
 import { MushafPage, type ActiveAyah } from "@/components/MushafPage";
 import { Button } from "@/components/ui/button";
-import { mushafPageQuery, type PageAyah } from "@/lib/mushaf";
-import { surahQuery } from "@/lib/quran";
+import { JUZ_START_PAGE, SURAH_START_PAGE, juzAtPage, mushafPageQuery, surahAtPage, type PageAyah } from "@/lib/mushaf";
+import { SURAHS, surahName, surahQuery } from "@/lib/quran";
 import { useT } from "@/lib/i18n";
 import { usePlayer } from "@/lib/player-context";
 import { setState, useStore } from "@/lib/store";
@@ -30,6 +30,12 @@ export function MushafReader({ page }: { page: number }) {
   const lang = useStore((s) => s.lang);
   const fontSize = useStore((s) => s.fontSize);
   const wide = useIsWide();
+
+  const navigate = useNavigate();
+  const go = (target: number) => {
+    const clamped = Math.min(604, Math.max(1, target));
+    navigate({ to: "/mushaf/$page", params: { page: String(clamped) } });
+  };
 
   useEffect(() => {
     setState((s) => (s.lastPage === page ? {} : { lastPage: page }));
@@ -70,6 +76,39 @@ export function MushafReader({ page }: { page: number }) {
           <Link to="/mushaf/$page" params={{ page: String(prevPage) }} aria-label={t("prev")} title={t("prev")} className="grid h-9 w-9 place-items-center rounded-full border transition-colors hover:bg-card"><ChevronRight className="h-5 w-5" /></Link>
         </div>
       </header>
+
+      <div className="mb-3 flex flex-wrap items-center gap-2 px-4">
+        <select
+          aria-label={t("surah")}
+          value={surahAtPage(page)}
+          onChange={(e) => go(SURAH_START_PAGE[Number(e.target.value) - 1] ?? 1)}
+          className="min-w-0 flex-1 rounded-xl border border-input bg-card px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring sm:flex-none"
+        >
+          {SURAHS.map((s) => (
+            <option key={s.n} value={s.n}>{num(s.n)}. {surahName(s, lang)}</option>
+          ))}
+        </select>
+        <select
+          aria-label={t("juz")}
+          value={juzAtPage(page)}
+          onChange={(e) => go(JUZ_START_PAGE[Number(e.target.value) - 1] ?? 1)}
+          className="rounded-xl border border-input bg-card px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+        >
+          {Array.from({ length: 30 }, (_, i) => i + 1).map((j) => (
+            <option key={j} value={j}>{t("juz")} {num(j)}</option>
+          ))}
+        </select>
+        <select
+          aria-label={t("page")}
+          value={page}
+          onChange={(e) => go(Number(e.target.value))}
+          className="rounded-xl border border-input bg-card px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+        >
+          {Array.from({ length: 604 }, (_, i) => i + 1).map((p) => (
+            <option key={p} value={p}>{t("page")} {num(p)}</option>
+          ))}
+        </select>
+      </div>
 
       <div className="flex items-stretch justify-center gap-2 px-3 pb-6 sm:gap-4">
         {pages.map((pg, i) => (
