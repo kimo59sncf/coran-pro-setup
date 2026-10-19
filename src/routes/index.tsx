@@ -10,6 +10,7 @@ import { ReciterPicker } from "@/components/LibraryControls";
 import { usePlayer } from "@/lib/player-context";
 import { SyncedReader } from "@/components/SyncedReader";
 import { ReciterDetail } from "@/components/ReciterDetail";
+import { setUI, useUI } from "@/lib/ui";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -54,12 +55,12 @@ function Home() {
     });
   }, [lang]);
 
-  const [view, setView] = useState<"home" | "reciter" | "reading">("home");
-  const [readingSurah, setReadingSurah] = useState(1);
-  const read = (n: number) => { setReadingSurah(n); setView("reading"); void player.playSurah(n); };
+  const view = useUI((s) => s.homeView);
+  const readingSurah = useUI((s) => s.readingSurah);
+  const read = (n: number) => { setUI({ readingSurah: n, homeView: "reading" }); void player.playSurah(n); };
 
-  if (view === "reciter") return <ReciterDetail onBack={() => setView("home")} onRead={read} />;
-  if (view === "reading") return <ReadingView surah={readingSurah} onBack={() => setView("reciter")} />;
+  if (view === "reciter") return <ReciterDetail onBack={() => setUI({ homeView: "home" })} onRead={read} />;
+  if (view === "reading") return <ReadingView surah={readingSurah} onBack={() => setUI({ homeView: "reciter" })} />;
 
   return (
     <div>
@@ -135,7 +136,7 @@ function Home() {
       </section>
 
       <h2 className="px-6 pb-2 pt-8 text-2xl font-semibold">{t("reciters")}</h2>
-      <div className="px-5 pb-2"><ReciterPicker onSelect={() => setView("reciter")} /></div>
+      <div className="px-5 pb-2"><ReciterPicker onSelect={() => setUI({ homeView: "reciter" })} /></div>
 
       <div ref={listRef} className="scroll-mt-4 px-6 pb-2 pt-6">
         <h2 className="text-2xl font-semibold">{t("surahsOf")} <span className="text-gold">{reciterName}</span></h2>

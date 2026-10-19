@@ -30,11 +30,31 @@ export function SurahActions({ n, favorite, saved, busy }: { n: number; favorite
   </div>;
 }
 
-export function ReciterPicker({ favoritesOnly = false, onSelect }: { favoritesOnly?: boolean; onSelect?: (id: string) => void }) {
+export function ReciterPicker({ favoritesOnly = false, onSelect, vertical = false }: { favoritesOnly?: boolean; onSelect?: (id: string) => void; vertical?: boolean }) {
   const { t, lang } = useT();
   const selected = useStore((s) => s.reciter);
   const favorites = useStore((s) => s.favoriteReciters);
   const list = RECITERS.filter((r) => !favoritesOnly || favorites.includes(r.id));
+
+  if (vertical) {
+    return <div role="region" aria-label={t("reciters")} className="flex flex-col gap-1">
+      {list.map((r) => {
+        const favorite = favorites.includes(r.id);
+        const on = selected === r.id;
+        const name = lang === "ar" ? r.ar : r.name;
+        return (
+          <div key={r.id} className="flex items-center gap-x-1 rounded-2xl px-1 py-1 transition-colors hover:bg-card/60">
+            <button onClick={() => { setState(() => ({ reciter: r.id })); onSelect?.(r.id); }} className="flex min-h-14 min-w-0 flex-1 items-center gap-3 rounded-xl px-2 py-1.5 text-start">
+              <span className="block -m-1 scale-90"><ReciterPortrait key={r.id} src={RECITER_PHOTOS[r.id]} name={r.name} selected={on} /></span>
+              <span className={`min-w-0 text-sm ${on ? "font-semibold text-primary" : "font-medium"}`}>{name}</span>
+            </button>
+            <Button variant="outline" size="icon" aria-label={`${t(favorite ? "removeFavorite" : "addFavorite")} · ${name}`} title={t(favorite ? "removeFavorite" : "addFavorite")} aria-pressed={favorite} className={`h-9 w-9 rounded-full ${favorite ? "text-favorite" : "text-muted-foreground"}`} onClick={() => setState((s) => ({ favoriteReciters: toggleIn(s.favoriteReciters, r.id) }))}><Heart fill={favorite ? "currentColor" : "none"} /></Button>
+          </div>
+        );
+      })}
+    </div>;
+  }
+
   return <div role="region" aria-label={t("reciters")} className="flex gap-3 overflow-x-auto px-1 py-2">
     {list.map((r) => {
       const favorite = favorites.includes(r.id);

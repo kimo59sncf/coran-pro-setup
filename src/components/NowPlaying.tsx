@@ -1,14 +1,17 @@
 import { useEffect, useState } from "react";
-import { ChevronsRight, ChevronDown, Pause, Play, Repeat, RotateCcw, RotateCw, Shuffle, SkipBack, SkipForward, X } from "lucide-react";
+import { ChevronsRight, ChevronDown, Pause, Play, Repeat, RotateCcw, RotateCw, Shuffle, SkipBack, SkipForward, User, Users, X } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { SurahActions } from "@/components/LibraryControls";
+import { ReciterPicker, SurahActions } from "@/components/LibraryControls";
 import { ReciterPortrait } from "@/components/ReciterPortrait";
+import { TrebleClef } from "@/components/TrebleClef";
 import { useDownload } from "@/lib/downloads";
 import { useT } from "@/lib/i18n";
 import { usePlayer } from "@/lib/player-context";
 import { RECITERS, surah, surahName } from "@/lib/quran";
 import { RECITER_PHOTOS } from "@/lib/reciter-photos";
 import { setState, useStore } from "@/lib/store";
+import { setUI } from "@/lib/ui";
 
 function useNowPlaying() {
   const p = usePlayer();
@@ -31,20 +34,39 @@ function Backdrop({ photo }: { photo: string | undefined }) {
 export function MiniPlayer() {
   const { p, tr, photo, reciterName, reciterId } = useNowPlaying();
   const { t, num, lang } = useT();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const [menu, setMenu] = useState(false);
+  const [recitersOpen, setRecitersOpen] = useState(false);
   if (!tr) return null;
   const s = surah(tr.s);
+  const viewReciter = () => { setMenu(false); setUI({ homeView: "reciter" }); void navigate({ to: "/" }); };
   return <>
     <div className="fixed inset-x-0 bottom-[calc(3.75rem+env(safe-area-inset-bottom))] z-20 px-3">
+      {menu && (
+        <div className="absolute bottom-full start-3 z-30 mb-2 w-60 overflow-hidden rounded-2xl border bg-card p-1 shadow-soft">
+          <button onClick={viewReciter} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-start transition-colors hover:bg-background/40">
+            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary/20 text-primary"><User className="h-4 w-4" /></span> {t("viewReciter")}
+          </button>
+          <button onClick={() => { setMenu(false); setRecitersOpen(true); }} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-start transition-colors hover:bg-background/40">
+            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary/20 text-primary"><Users className="h-4 w-4" /></span> {t("changeReciter")}
+          </button>
+        </div>
+      )}
       <div className="relative mx-auto max-w-3xl overflow-hidden rounded-2xl border bg-card shadow-soft">
         <Backdrop photo={photo} />
-        <div className="relative flex items-center gap-3 p-2.5">
-          <button onClick={() => setOpen(true)} aria-label={t("openPlayer")} className="flex min-w-0 flex-1 items-center gap-3 text-start">
-            <span className="scale-75 -m-2"><ReciterPortrait src={photo} name={reciterName} selected={false} /></span>
+        <div className="relative flex items-center gap-1.5 p-2.5">
+          <button onClick={() => setMenu((v) => !v)} aria-label={reciterName} title={reciterName} aria-expanded={menu} className="shrink-0">
+            <span className="block -m-1 scale-90"><ReciterPortrait src={photo} name={reciterName} selected={false} /></span>
+          </button>
+          <button onClick={() => setOpen(true)} aria-label={t("openPlayer")} className="flex min-w-0 flex-1 items-center text-start">
             <span className="min-w-0">
               <span className="block truncate text-sm font-semibold">{surahName(s, lang)}</span>
               <span className="block truncate text-xs text-muted-foreground">{reciterName} · {t("ayah")} {num(tr.a)}{p.error && ` · ${t("error")}`}</span>
             </span>
+          </button>
+          <button aria-label={t("openPlayer")} title={t("openPlayer")} onClick={() => setOpen(true)} className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-gold text-gold-foreground shadow-gold transition-transform active:scale-95">
+            <TrebleClef className="h-5 w-5" />
           </button>
           <Button size="icon" variant="ghost" aria-label={t("prev")} onClick={p.prev}><SkipBack className="rtl:rotate-180" /></Button>
           <button aria-label={p.error ? t("retry") : p.playing ? t("pause") : t("play")} onClick={p.toggle} className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-gold text-gold-foreground shadow-gold transition-transform active:scale-95">
@@ -58,6 +80,7 @@ export function MiniPlayer() {
       </div>
     </div>
     {open && <FullPlayer onClose={() => setOpen(false)} key={reciterId} />}
+    {recitersOpen && <RecitersOverlay onClose={() => setRecitersOpen(false)} />}
   </>;
 }
 
@@ -127,4 +150,27 @@ function FullPlayer({ onClose }: { onClose: () => void }) {
       </div>
     </div>
   </div>;
+}
+
+function RecitersOverlay({ onClose }: { onClose: () => void }) {
+  const { t } = useT();
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
+  }, [onClose]);
+  return (
+    <div role="dialog" aria-modal="true" aria-label={t("changeReciter")} className="fixed inset-0 z-50 flex flex-col bg-background/95 backdrop-blur">
+      <div className="mx-auto w-full max-w-md px-5 pb-10 pt-[calc(1rem+env(safe-area-inset-top))]">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold">{t("changeReciter")}</h2>
+          <Button size="icon" variant="ghost" aria-label={t("close")} onClick={onClose}><X className="h-5 w-5" /></Button>
+        </div>
+        <div className="mt-4">
+          <ReciterPicker vertical onSelect={onClose} />
+        </div>
+      </div>
+    </div>
+  );
 }
