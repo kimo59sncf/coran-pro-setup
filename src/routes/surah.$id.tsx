@@ -1,7 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-import { Bookmark, ChevronLeft, ChevronRight, Copy, Heart, Pause, Play, Share2, Shuffle } from "lucide-react";
+import { Bookmark, BookOpen, ChevronLeft, ChevronRight, Copy, Heart, Pause, Play, Share2, Shuffle } from "lucide-react";
 import { toast } from "sonner";
 import { useT } from "@/lib/i18n";
 import { setState, toggleIn, useStore } from "@/lib/store";
@@ -81,13 +81,18 @@ function Reader() {
           <h1 className="mt-2 text-3xl font-semibold tracking-tight">{s.tr}</h1>
           <p className="mt-1 text-sm text-foreground/80">{lang === "en" && `${s.en} · `}{num(s.ayahs)} {t("ayahs")} · {t(s.type === "Meccan" ? "meccan" : "medinan")}</p>
 
-          <div className="mt-6 flex items-center justify-center gap-3">
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
             <button onClick={() => (current !== null ? p.toggle() : play(0))} disabled={!q.data && current === null} className="inline-flex items-center gap-2 rounded-full bg-gold px-5 py-2.5 text-sm font-semibold text-gold-foreground shadow-lg transition-transform hover:scale-[1.03] disabled:opacity-50">
               {current !== null && p.playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />} {t("playSurah")}
             </button>
             <button onClick={() => void p.playRandomSurah()} className="inline-flex items-center gap-2 rounded-full border border-foreground/30 bg-foreground/10 px-5 py-2.5 text-sm font-semibold backdrop-blur-sm transition-colors hover:bg-foreground/20">
               <Shuffle className="h-4 w-4" /> {t("surpriseMe")}
             </button>
+            {q.data?.[0]?.page ? (
+              <Link to="/mushaf/$page" params={{ page: String(q.data[0].page) }} className="inline-flex items-center gap-2 rounded-full border border-gold/60 bg-foreground/10 px-5 py-2.5 text-sm font-semibold text-gold backdrop-blur-sm transition-colors hover:bg-foreground/20">
+                <BookOpen className="h-4 w-4" /> {t("bookView")}
+              </Link>
+            ) : null}
           </div>
         </div>
       </header>

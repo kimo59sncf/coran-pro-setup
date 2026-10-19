@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { BookOpen, Headphones, ListMusic, Play, Shuffle, Mic } from "lucide-react";
+import { BookOpen, ChevronDown, ChevronLeft, Headphones, ListMusic, Play, Shuffle, Mic } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { favoriteSurahsOf, setState, useStore } from "@/lib/store";
 import { useDownloadedSurahs } from "@/lib/downloads";
@@ -8,6 +8,8 @@ import { RECITERS, SURAHS, surah, surahName } from "@/lib/quran";
 import { SurahRow } from "@/components/AppShell";
 import { ReciterPicker } from "@/components/LibraryControls";
 import { usePlayer } from "@/lib/player-context";
+import { SyncedReader } from "@/components/SyncedReader";
+import { ReciterDetail } from "@/components/ReciterDetail";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -36,6 +38,7 @@ function Home() {
   const shuffle = useStore((s) => s.playlistShuffle);
   const downloads = useDownloadedSurahs(lang, reciter);
   const [filter, setFilter] = useState<"all" | "favorites" | "offline">("all");
+  const [playlistOpen, setPlaylistOpen] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
   const r = RECITERS.find((x) => x.id === reciter);
   const reciterName = r ? (lang === "ar" ? r.ar : r.name) : "";
@@ -50,6 +53,13 @@ function Home() {
       morning: d.getHours() < 17,
     });
   }, [lang]);
+
+  const [view, setView] = useState<"home" | "reciter" | "reading">("home");
+  const [readingSurah, setReadingSurah] = useState(1);
+  const read = (n: number) => { setReadingSurah(n); setView("reading"); void player.playSurah(n); };
+
+  if (view === "reciter") return <ReciterDetail onBack={() => setView("home")} onRead={read} />;
+  if (view === "reading") return <ReadingView surah={readingSurah} onBack={() => setView("reciter")} />;
 
   return (
     <div>
@@ -83,9 +93,15 @@ function Home() {
       )}
 
       <section className="surface mx-3 mt-5 overflow-hidden">
-        <div className="flex items-center gap-3 px-5 pb-3 pt-5">
-          <span className="grid h-10 w-10 place-items-center rounded-full bg-primary/20 text-primary"><ListMusic className="h-5 w-5" /></span>
-          <h2 className="flex-1 text-2xl font-semibold">{t("myPlaylist")}</h2>
+        <div className="flex items-center gap-2 px-5 pb-3 pt-5">
+          <button onClick={() => setPlaylistOpen((v) => !v)} aria-expanded={playlistOpen} className="flex min-w-0 flex-1 items-center gap-3 text-start">
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary/20 text-primary"><ListMusic className="h-5 w-5" /></span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-2xl font-semibold leading-tight">{t("myPlaylist")}</span>
+              {playlist.length > 0 && <span className="block text-xs text-muted-foreground">{num(playlist.length)} {t("surahs")}</span>}
+            </span>
+            <ChevronDown className={`h-5 w-5 shrink-0 text-muted-foreground transition-transform ${playlistOpen ? "rotate-180" : ""}`} />
+          </button>
           <button aria-label={t("shufflePlaylist")} title={t("shufflePlaylist")} aria-pressed={shuffle} onClick={() => setState((s) => ({ playlistShuffle: !s.playlistShuffle }))}
             className={`grid h-11 w-11 place-items-center rounded-full border transition-colors ${shuffle ? "border-gold text-gold" : "text-muted-foreground"}`}><Shuffle className="h-4 w-4" /></button>
           <button disabled={!playlist.length} onClick={() => player.playPlaylist()}
@@ -93,7 +109,7 @@ function Home() {
             <Play className="h-5 w-5 translate-x-px" fill="currentColor" />
           </button>
         </div>
-        {playlist.length ? (
+        {playlistOpen && playlist.length > 0 && (
           <ol className="px-2 pb-3">
             {playlist.map((n, i) => {
               const pr = RECITERS.find((x) => x.id === (playlistReciters[n] ?? reciter));
@@ -112,11 +128,14 @@ function Home() {
               );
             })}
           </ol>
-        ) : <p className="px-5 pb-5 text-sm text-muted-foreground">{t("emptyPlaylist")}</p>}
+        )}
+        {playlistOpen && !playlist.length && (
+          <p className="px-5 pb-5 text-sm text-muted-foreground">{t("emptyPlaylist")}</p>
+        )}
       </section>
 
       <h2 className="px-6 pb-2 pt-8 text-2xl font-semibold">{t("reciters")}</h2>
-      <div className="px-5 pb-2"><ReciterPicker onSelect={() => listRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })} /></div>
+      <div className="px-5 pb-2"><ReciterPicker onSelect={() => setView("reciter")} /></div>
 
       <div ref={listRef} className="scroll-mt-4 px-6 pb-2 pt-6">
         <h2 className="text-2xl font-semibold">{t("surahsOf")} <span className="text-gold">{reciterName}</span></h2>
@@ -151,5 +170,19 @@ function ContinueCard({ icon, label, pos }: { icon: React.ReactNode; label: stri
         </div>
       </div>
     </Link>
+  );
+}
+
+function ReadingView({ surah, onBack }: { surah: number; onBack: () => void }) {
+  const { t } = useT();
+  return (
+    <div>
+      <div className="px-4 pt-4">
+        <button onClick={onBack} className="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-colors hover:bg-card">
+          <ChevronLeft className="h-4 w-4 rtl:rotate-180" /> {t("reciters")}
+        </button>
+      </div>
+      <SyncedReader surah={surah} />
+    </div>
   );
 }

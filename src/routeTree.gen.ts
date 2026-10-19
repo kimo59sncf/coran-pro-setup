@@ -11,11 +11,13 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as FavoritesRouteImport } from './routes/favorites'
+import { Route as MushafRouteImport } from './routes/mushaf'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ReciteRouteImport } from './routes/recite'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SurahsRouteImport } from './routes/surahs'
+import { Route as MushafPageRouteImport } from './routes/mushaf.$page'
 import { Route as SurahIdRouteImport } from './routes/surah.$id'
 import { Route as ApiPublicQuranAudioRouteImport } from './routes/api/public/quran-audio'
 import { Route as ApiPublicReciteTranscribeRouteImport } from './routes/api/public/recite-transcribe'
@@ -28,6 +30,11 @@ const IndexRoute = IndexRouteImport.update({
 const FavoritesRoute = FavoritesRouteImport.update({
   id: '/favorites',
   path: '/favorites',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MushafRoute = MushafRouteImport.update({
+  id: '/mushaf',
+  path: '/mushaf',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -55,6 +62,11 @@ const SurahsRoute = SurahsRouteImport.update({
   path: '/surahs',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MushafPageRoute = MushafPageRouteImport.update({
+  id: '/$page',
+  path: '/$page',
+  getParentRoute: () => MushafRoute,
+} as any)
 const SurahIdRoute = SurahIdRouteImport.update({
   id: '/surah/$id',
   path: '/surah/$id',
@@ -75,11 +87,13 @@ const ApiPublicReciteTranscribeRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/favorites': typeof FavoritesRoute
+  '/mushaf': typeof MushafRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/recite': typeof ReciteRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/surahs': typeof SurahsRoute
+  '/mushaf/$page': typeof MushafPageRoute
   '/surah/$id': typeof SurahIdRoute
   '/api/public/quran-audio': typeof ApiPublicQuranAudioRoute
   '/api/public/recite-transcribe': typeof ApiPublicReciteTranscribeRoute
@@ -87,11 +101,13 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/favorites': typeof FavoritesRoute
+  '/mushaf': typeof MushafRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/recite': typeof ReciteRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/surahs': typeof SurahsRoute
+  '/mushaf/$page': typeof MushafPageRoute
   '/surah/$id': typeof SurahIdRoute
   '/api/public/quran-audio': typeof ApiPublicQuranAudioRoute
   '/api/public/recite-transcribe': typeof ApiPublicReciteTranscribeRoute
@@ -100,11 +116,13 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/favorites': typeof FavoritesRoute
+  '/mushaf': typeof MushafRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/recite': typeof ReciteRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/surahs': typeof SurahsRoute
+  '/mushaf/$page': typeof MushafPageRoute
   '/surah/$id': typeof SurahIdRoute
   '/api/public/quran-audio': typeof ApiPublicQuranAudioRoute
   '/api/public/recite-transcribe': typeof ApiPublicReciteTranscribeRoute
@@ -114,11 +132,13 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/favorites'
+    | '/mushaf'
     | '/privacy'
     | '/recite'
     | '/search'
     | '/settings'
     | '/surahs'
+    | '/mushaf/$page'
     | '/surah/$id'
     | '/api/public/quran-audio'
     | '/api/public/recite-transcribe'
@@ -126,11 +146,13 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/favorites'
+    | '/mushaf'
     | '/privacy'
     | '/recite'
     | '/search'
     | '/settings'
     | '/surahs'
+    | '/mushaf/$page'
     | '/surah/$id'
     | '/api/public/quran-audio'
     | '/api/public/recite-transcribe'
@@ -138,11 +160,13 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/favorites'
+    | '/mushaf'
     | '/privacy'
     | '/recite'
     | '/search'
     | '/settings'
     | '/surahs'
+    | '/mushaf/$page'
     | '/surah/$id'
     | '/api/public/quran-audio'
     | '/api/public/recite-transcribe'
@@ -151,6 +175,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   FavoritesRoute: typeof FavoritesRoute
+  MushafRoute: typeof MushafRouteWithChildren
   PrivacyRoute: typeof PrivacyRoute
   ReciteRoute: typeof ReciteRoute
   SearchRoute: typeof SearchRoute
@@ -175,6 +200,13 @@ declare module '@tanstack/react-router' {
       path: '/favorites'
       fullPath: '/favorites'
       preLoaderRoute: typeof FavoritesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mushaf': {
+      id: '/mushaf'
+      path: '/mushaf'
+      fullPath: '/mushaf'
+      preLoaderRoute: typeof MushafRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -212,6 +244,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SurahsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/mushaf/$page': {
+      id: '/mushaf/$page'
+      path: '/$page'
+      fullPath: '/mushaf/$page'
+      preLoaderRoute: typeof MushafPageRouteImport
+      parentRoute: typeof MushafRoute
+    }
     '/surah/$id': {
       id: '/surah/$id'
       path: '/surah/$id'
@@ -236,9 +275,21 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface MushafRouteChildren {
+  MushafPageRoute: typeof MushafPageRoute
+}
+
+const MushafRouteChildren: MushafRouteChildren = {
+  MushafPageRoute: MushafPageRoute,
+}
+
+const MushafRouteWithChildren =
+  MushafRoute._addFileChildren(MushafRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   FavoritesRoute: FavoritesRoute,
+  MushafRoute: MushafRouteWithChildren,
   PrivacyRoute: PrivacyRoute,
   ReciteRoute: ReciteRoute,
   SearchRoute: SearchRoute,

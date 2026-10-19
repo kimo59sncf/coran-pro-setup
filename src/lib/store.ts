@@ -19,6 +19,7 @@ export type AppState = {
   lastListen: { s: number; a: number } | null;
   searchHistory: string[];
   stats: { sessions: number; surahsOpened: number[] };
+  lastPage: number;
 };
 
 const KEY = "cpf.state";
@@ -40,6 +41,7 @@ export const defaultState: AppState = {
   lastListen: null,
   searchHistory: [],
   stats: { sessions: 0, surahsOpened: [] },
+  lastPage: 1,
 };
 
 let state: AppState = defaultState;

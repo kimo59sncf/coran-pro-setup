@@ -1,10 +1,10 @@
 import { queryOptions } from "@tanstack/react-query";
 
-export type PageAyah = { s: number; n: number; global: number; ar: string; page: number };
-type OfficialAyah = { surah: { number: number }; numberInSurah: number; number: number; text: string; page: number };
+export type PageAyah = { s: number; n: number; global: number; ar: string; page: number; juz: number; hizbQuarter: number };
+type OfficialAyah = { surah: { number: number }; numberInSurah: number; number: number; text: string; page: number; juz: number; hizbQuarter: number };
 
 export function mapPage(ayahs: OfficialAyah[]): PageAyah[] {
-  return ayahs.map((a) => ({ s: a.surah.number, n: a.numberInSurah, global: a.number, ar: a.text, page: a.page }));
+  return ayahs.map((a) => ({ s: a.surah.number, n: a.numberInSurah, global: a.number, ar: a.text, page: a.page, juz: a.juz, hizbQuarter: a.hizbQuarter }));
 }
 
 async function verifiedData(url: string) {

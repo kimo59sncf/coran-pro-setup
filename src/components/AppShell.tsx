@@ -1,6 +1,6 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
-import { BookOpen, CloudCheck, Heart, Home, Pause, Play, Repeat, Search, Settings, SkipBack, SkipForward, Shuffle, X, RotateCw } from "lucide-react";
+import { BookOpen, BookOpenText, CloudCheck, Heart, Home, Pause, Play, Repeat, Search, Settings, SkipBack, SkipForward, Shuffle, X, RotateCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SurahActions } from "@/components/LibraryControls";
 import { useDownload } from "@/lib/downloads";
@@ -13,9 +13,10 @@ import { initNative } from "@/lib/native";
 import { MiniPlayer } from "@/components/NowPlaying";
 import { isNativeApp } from "@/lib/platform";
 
-const tabs: { to: "/" | "/surahs" | "/search" | "/favorites" | "/settings"; icon: typeof Home; k: TKey }[] = [
+const tabs: { to: "/" | "/surahs" | "/mushaf" | "/search" | "/favorites" | "/settings"; icon: typeof Home; k: TKey }[] = [
   { to: "/", icon: Home, k: "home" },
   { to: "/surahs", icon: BookOpen, k: "surahs" },
+  { to: "/mushaf", icon: BookOpenText, k: "mushaf" },
   { to: "/search", icon: Search, k: "search" },
   { to: "/favorites", icon: Heart, k: "favorites" },
   { to: "/settings", icon: Settings, k: "settings" },
@@ -23,6 +24,8 @@ const tabs: { to: "/" | "/surahs" | "/search" | "/favorites" | "/settings"; icon
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { t, lang, dir } = useT();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const wide = pathname.startsWith("/mushaf");
   useEffect(() => {
     document.documentElement.lang = lang;
     document.documentElement.dir = dir;
@@ -45,7 +48,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   }, []);
   const online = useOnline();
   return (
-    <div className="mx-auto min-h-screen max-w-3xl pb-[calc(11rem+env(safe-area-inset-bottom))] pt-[env(safe-area-inset-top)]">
+    <div className={`mx-auto min-h-screen ${wide ? "max-w-6xl" : "max-w-3xl"} pb-[calc(11rem+env(safe-area-inset-bottom))] pt-[env(safe-area-inset-top)]`}>
       {!online && (
         <div role="status" className="sticky top-0 z-40 bg-gold px-4 py-2 text-center text-xs font-medium text-gold-foreground">
           {t("offlineBanner")}
