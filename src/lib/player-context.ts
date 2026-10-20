@@ -4,7 +4,7 @@ export type Track = { s: number; a: number; url: string };
 export type Repeat = "off" | "ayah" | "surah";
 export type PlayerContextValue = {
   queue: Track[]; index: number; playing: boolean; error: boolean;
-  speed: number; repeat: Repeat; progress: number;
+  speed: number; repeat: Repeat; progress: number; currentTime: number; duration: number;
   playQueue: (q: Track[], start: number) => void;
   toggle: () => void; next: () => void; prev: () => void;
   nextSurah: () => void;
@@ -12,7 +12,7 @@ export type PlayerContextValue = {
   playPlaylist: () => void;
   reciter: string | null;
   playRandomSurah: () => Promise<void>;
-  seek: (delta: number) => void; setSpeed: (n: number) => void; setRepeat: (r: Repeat) => void; stop: () => void;
+  seek: (delta: number) => void; seekTo: (t: number) => void; setSpeed: (n: number) => void; setRepeat: (r: Repeat) => void; stop: () => void;
 };
 
 // Keep context identity independent of the provider's Fast Refresh boundary.

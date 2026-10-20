@@ -7,6 +7,7 @@ export type AppState = {
   reciter: string;
   showTranslation: boolean;
   fontSize: number;
+  translationSize: number;
   favorites: string[]; // "surah:ayah"
   favoriteSurahs: Record<string, number[]>; // surah favorites per reciter id
   favoriteReciters: string[];
@@ -29,6 +30,7 @@ export const defaultState: AppState = {
   reciter: "ar.alafasy",
   showTranslation: true,
   fontSize: 30,
+  translationSize: 16,
   favorites: [],
   favoriteSurahs: {},
   favoriteReciters: [],

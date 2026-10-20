@@ -14,6 +14,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const [speed, setSpeed] = useState(1);
   const [repeat, setRepeat] = useState<Repeat>("off");
   const [progress, setProgress] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
   const [reciter, setReciter] = useState<string | null>(null);
   const request = useRef(0);
   const blobUrl = useRef<string | null>(null);
@@ -34,7 +36,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     el.onplay = () => { if (audio.current === el) setPlaying(true); };
     el.onpause = () => { if (audio.current === el) setPlaying(false); };
     el.onerror = () => { if (audio.current === el) { setError(true); setPlaying(false); } };
-    el.ontimeupdate = () => { if (audio.current === el) setProgress(el.duration ? el.currentTime / el.duration : 0); };
+    el.ontimeupdate = () => { if (audio.current === el) { setProgress(el.duration ? el.currentTime / el.duration : 0); setCurrentTime(el.currentTime); setDuration(el.duration || 0); } };
     el.onended = () => {
       if (audio.current !== el) return;
       const { queue, index, repeat } = st.current;
@@ -63,7 +65,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     let el = audio.current; const tr = q[i];
     if (!el || !tr) return;
     const id = ++request.current;
-    el.pause(); setIndex(i); setError(false); setProgress(0);
+    el.pause(); setIndex(i); setError(false); setProgress(0); setCurrentTime(0); setDuration(0);
     st.current = { ...st.current, queue: q, index: i };
     const ready = preloader.current?.take(tr.url);
     let url: string;
@@ -118,7 +120,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   }
 
   const value: PlayerContextValue = {
-    queue, index, playing, error, speed, repeat, progress,
+    queue, index, playing, error, speed, repeat, progress, currentTime, duration,
     playSurah, reciter,
     playRandomSurah,
     playPlaylist: () => { const s = getState(); const n = playlistStart(s.playlist, s.playlistShuffle); if (n) void playNext(n); },
@@ -137,6 +139,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     prev: () => load(Math.max(index - 1, 0), queue),
     setSpeed, setRepeat,
     seek: (delta) => { const el = audio.current; if (el && el.duration) el.currentTime = Math.max(0, Math.min(el.duration, el.currentTime + delta)); },
+    seekTo: (t) => { const el = audio.current; if (el && el.duration) el.currentTime = Math.max(0, Math.min(el.duration, t)); },
     stop: () => { request.current++; preloader.current?.clear(); audio.current?.pause(); if (blobUrl.current) URL.revokeObjectURL(blobUrl.current); blobUrl.current = null; st.current.queue = []; setQueue([]); },
   };
   return <PlayerCtx.Provider value={value}>{children}</PlayerCtx.Provider>;

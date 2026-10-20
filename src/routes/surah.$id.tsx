@@ -147,6 +147,7 @@ function AyahCard({ s, a, showTr, active, playing, onPlay }: { s: number; a: Aya
   const fav = useStore((x) => x.favorites.includes(key));
   const bm = useStore((x) => x.bookmarks.includes(key));
   const size = useStore((x) => x.fontSize);
+  const trSize = useStore((x) => x.translationSize);
   const ref = useRef<HTMLElement>(null);
   const [seen, setSeen] = useState(false);
 
@@ -181,7 +182,7 @@ function AyahCard({ s, a, showTr, active, playing, onPlay }: { s: number; a: Aya
       <p dir="rtl" lang="ar" className="font-quran text-right leading-[2.2]" style={{ fontSize: size }}>
         {stripBasmala(s, a)} <span className="text-gold">﴿{a.n.toLocaleString("ar-EG")}﴾</span>
       </p>
-      {showTr && a.tr && <p className="mt-4 leading-relaxed text-muted-foreground">{a.tr}</p>}
+      {showTr && a.tr && <p className="mt-4 leading-relaxed text-muted-foreground" style={{ fontSize: trSize }}>{a.tr}</p>}
     </article>
   );
 }
