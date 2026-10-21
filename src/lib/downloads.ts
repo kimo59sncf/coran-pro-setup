@@ -1,39 +1,29 @@
 import { useEffect, useState } from "react";
 import { QueryClient } from "@tanstack/react-query";
 import { DATA_CACHE, offlineSupported } from "./offline";
-import { surahQuery, surahUrl } from "./quran";
+import { SURAHS, surahQuery, surahUrl } from "./quran";
 import type { Lang } from "./store";
 import { audioDownloadUrl } from "./audio-source";
+import { EVERYAYAH_PRIMARY, everyAyahUrl } from "./everyayah";
+
+export { everyAyahUrl };
 
 const listeners = new Set<() => void>();
 const pending = new Set<string>();
 const notify = () => listeners.forEach((fn) => fn());
 
-const EVERYAYAH: Record<string, string> = {
-  "ar.alafasy": "Alafasy_128kbps",
-  "ar.husary": "Husary_128kbps",
-  "ar.minshawi": "Minshawy_Murattal_128kbps",
-  "ar.abdulbasitmurattal": "Abdul_Basit_Murattal_192kbps",
-  "ar.abdurrahmaansudais": "Abdurrahmaan_As-Sudais_192kbps",
-  "ar.mahermuaiqly": "MaherAlMuaiqly128kbps",
-  "ar.saoodshuraym": "Saood_ash-Shuraym_128kbps",
-  "ar.ahmedajamy": "Ahmed_ibn_Ali_al-Ajamy_64kbps_QuranExplorer.Com",
-  "ar.abdullahbasfar": "Abdullah_Basfar_192kbps",
-  "ar.muhammadayyoub": "Muhammad_Ayyoub_128kbps",
-  "ar.muhammadjibreel": "Muhammad_Jibreel_64kbps",
-};
-export function everyAyahUrl(reciter: string, s: number, a: number) {
-  const dir = EVERYAYAH[reciter];
-  if (!dir) return null;
-  const p = (x: number) => String(x).padStart(3, "0");
-  return `https://everyayah.com/data/${dir}/${p(s)}${p(a)}.mp3`;
-}
 
 export async function isDownloaded(n: number, lang: Lang, reciter: string) {
   if (!offlineSupported()) return false;
   const cache = await caches.open(DATA_CACHE);
   const response = await cache.match(surahUrl(n, lang, reciter));
   if (!response) return false;
+  if (EVERYAYAH_PRIMARY.has(reciter)) {
+    const total = SURAHS[n - 1]?.ayahs ?? 0;
+    if (!total) return false;
+    for (let a = 1; a <= total; a++) if (!(await cache.match(everyAyahUrl(reciter, n, a)!))) return false;
+    return true;
+  }
   const { data } = await response.json();
   const ayahs: { audio: string }[] = data?.[1]?.ayahs ?? [];
   if (!ayahs.length) return false;
@@ -54,8 +44,8 @@ export async function downloadSurah(n: number, lang: Lang, reciter: string) {
       if (!response.ok) throw new Error("network");
       await cache.put(key, response.clone());
     }
-    const { data } = await response.json();
-    const queue: { audio: string; numberInSurah?: number }[] = [...data[1].ayahs];
+    const primary = EVERYAYAH_PRIMARY.has(reciter);
+    const queue: { s: number; a: number; url: string }[] = await surahTracks(n, lang, reciter);
     const fetchAudio = async (url: string) => {
       const res = await fetch(url);
       if (!res.ok || !res.headers.get("content-type")?.startsWith("audio/")) throw new Error("network");
@@ -65,16 +55,20 @@ export async function downloadSurah(n: number, lang: Lang, reciter: string) {
     };
     const worker = async () => {
       while (queue.length) {
-        const ayah = queue.shift();
-        if (!ayah) return;
-        if (await cache.match(ayah.audio)) continue;
-        // Primary: EveryAyah mirror (CORS-enabled). Fallback: our allowlisted relay.
+        const track = queue.shift();
+        if (!track) return;
+        if (await cache.match(track.url)) continue;
+        // Primary reciters point straight to EveryAyah (CORS-enabled). Others
+        // fall back to the EveryAyah mirror, then to our allowlisted relay.
         // The original URL stays the cache key so playback finds it offline.
-        const mirror = ayah.numberInSurah ? everyAyahUrl(reciter, n, ayah.numberInSurah) : null;
-        let blob: Blob | null = null;
-        if (mirror) blob = await fetchAudio(mirror).catch(() => null);
-        if (!blob) blob = await fetchAudio(audioDownloadUrl(ayah.audio));
-        await cache.put(ayah.audio, new Response(blob, { headers: { "Content-Type": "audio/mpeg" } }));
+        let blob: Blob | null = await fetchAudio(track.url).catch(() => null);
+        if (!blob && !primary) {
+          const mirror = everyAyahUrl(reciter, track.s, track.a);
+          if (mirror && mirror !== track.url) blob = await fetchAudio(mirror).catch(() => null);
+          if (!blob) blob = await fetchAudio(audioDownloadUrl(track.url)).catch(() => null);
+        }
+        if (!blob) throw new Error("network");
+        await cache.put(track.url, new Response(blob, { headers: { "Content-Type": "audio/mpeg" } }));
       }
     };
     // Wait for every worker before clearing the busy state, even on a failed download.

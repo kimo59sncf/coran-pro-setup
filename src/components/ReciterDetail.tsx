@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { ChevronLeft, Download, Play, Shuffle } from "lucide-react";
 import { toast } from "sonner";
-import { useT } from "@/lib/i18n";
+import { useT, type TKey } from "@/lib/i18n";
 import { usePlayer } from "@/lib/player-context";
 import { useDownload } from "@/lib/downloads";
 import { SurahActions } from "@/components/LibraryControls";
-import { RECITERS, SURAHS, surah, surahName } from "@/lib/quran";
+import { RECITERS, RECITER_META, SURAHS, surah, surahName } from "@/lib/quran";
 import { RECITER_PHOTOS } from "@/lib/reciter-photos";
 import { useStore } from "@/lib/store";
 import { saveAllSurahs } from "@/lib/offline";
@@ -22,6 +22,7 @@ export function ReciterDetail({ onBack, onRead }: { onBack: () => void; onRead: 
   const [imgFailed, setImgFailed] = useState(false);
   const [saving, setSaving] = useState(false);
   const initials = name.split(" ").map((w) => w[0]).slice(0, 2).join("");
+  const meta = RECITER_META[reciter];
 
   const saveAll = async () => {
     if (saving) return;
@@ -48,7 +49,12 @@ export function ReciterDetail({ onBack, onRead }: { onBack: () => void; onRead: 
             : <span className="grid h-full w-full place-items-center bg-accent font-display text-2xl font-semibold">{initials}</span>}
         </span>
         <h1 className="mt-3 text-2xl font-semibold">{name}</h1>
-        <p className="mt-1 text-sm text-foreground/80">{t("reciter")}</p>
+        <p className="mt-1 text-sm text-foreground/80">{t("reciter")}{meta?.riwaya ? ` · ${meta.riwaya}` : ""}</p>
+        {meta?.categories?.length ? (
+          <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+            {meta.categories.map((c) => <span key={c} className="rounded-full bg-foreground/10 px-3 py-1 text-xs font-medium">{t(`cat_${c}` as TKey)}</span>)}
+          </div>
+        ) : null}
         <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
           <button onClick={saveAll} disabled={saving} className="inline-flex min-h-11 items-center gap-2 rounded-full bg-foreground/10 px-5 text-sm font-semibold backdrop-blur-sm transition-colors hover:bg-foreground/20 disabled:opacity-50">
             <Download className="h-4 w-4" /> {saving ? t("saving") : t("saveAll")}
