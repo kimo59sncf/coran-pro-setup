@@ -64,12 +64,12 @@ function Home() {
 
   return (
     <div>
-      <section className="bg-hero relative m-3 overflow-hidden rounded-3xl px-5 pb-6 pt-7 sm:px-6 sm:pb-8 sm:pt-10 text-primary-foreground">
+      <section className="bg-hero relative m-3 overflow-hidden rounded-3xl px-5 pb-5 pt-5 sm:px-6 sm:pb-6 sm:pt-7 text-primary-foreground">
         <p className="text-xs uppercase tracking-widest opacity-75">{date ? `${date.g} · ${date.h}` : "\u00a0"}</p>
-        <h1 className="mt-2 text-[2.5rem] font-semibold leading-tight">{date ? t(date.morning ? "morning" : "evening") : "\u00a0"}</h1>
-        <p className="mt-1 opacity-80">{t("tagline")}</p>
-        <p dir="rtl" className="font-quran mt-4 text-[1.75rem] leading-relaxed text-gold sm:mt-6 sm:text-3xl">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</p>
-        <div className="mt-5 flex flex-wrap gap-3">
+        <h1 className="mt-1 text-3xl font-semibold leading-tight">{date ? t(date.morning ? "morning" : "evening") : "\u00a0"}</h1>
+        <p className="mt-0.5 text-sm opacity-80">{t("tagline")}</p>
+        <p dir="rtl" className="font-quran mt-3 text-xl leading-relaxed text-gold sm:mt-4 sm:text-2xl">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</p>
+        <div className="mt-4 flex flex-wrap gap-2">
           <button onClick={() => void player.playRandomSurah()} className="inline-flex items-center gap-2 min-h-11 rounded-full bg-gold px-5 text-sm font-semibold text-gold-foreground shadow-lg transition-transform hover:scale-[1.03]">
             <Shuffle className="h-4 w-4" /> {t("surpriseMe")}
           </button>
@@ -88,17 +88,17 @@ function Home() {
       </div>
 
       {opened > 0 && (
-        <p className="px-6 pt-4 text-sm text-muted-foreground">
+        <p className="px-6 pt-3 text-sm text-muted-foreground">
           {num(opened)} / {num(114)} {t("opened")}
         </p>
       )}
 
-      <section className="surface mx-3 mt-5 overflow-hidden">
-        <div className="flex items-center gap-2 px-5 pb-3 pt-5">
+      <section className="surface mx-3 mt-4 overflow-hidden">
+        <div className="flex items-center gap-2 px-5 pb-2 pt-4">
           <button onClick={() => setPlaylistOpen((v) => !v)} aria-expanded={playlistOpen} className="flex min-w-0 flex-1 items-center gap-3 text-start">
             <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary/20 text-primary"><ListMusic className="h-5 w-5" /></span>
             <span className="min-w-0 flex-1">
-              <span className="block text-2xl font-semibold leading-tight">{t("myPlaylist")}</span>
+              <span className="block text-xl font-semibold leading-tight">{t("myPlaylist")}</span>
               {playlist.length > 0 && <span className="block text-xs text-muted-foreground">{num(playlist.length)} {t("surahs")}</span>}
             </span>
             <ChevronDown className={`h-5 w-5 shrink-0 text-muted-foreground transition-transform ${playlistOpen ? "rotate-180" : ""}`} />
@@ -135,7 +135,7 @@ function Home() {
         )}
       </section>
 
-      <h2 className="px-6 pb-2 pt-8 text-2xl font-semibold">{t("reciters")}</h2>
+      <h2 className="px-6 pb-2 pt-5 text-2xl font-semibold">{t("reciters")}</h2>
       <div className="px-5 pb-2"><ReciterPicker onSelect={() => setUI({ homeView: "reciter" })} /></div>
 
       <div ref={listRef} className="scroll-mt-4 px-6 pb-2 pt-6">
@@ -161,7 +161,7 @@ function ContinueCard({ icon, label, pos }: { icon: React.ReactNode; label: stri
   const { t, num, lang } = useT();
   const s = surah(pos.s);
   return (
-    <Link to="/surah/$id" params={{ id: String(pos.s) }} hash={`a${pos.a}`} className="surface flex items-center gap-4 p-4 transition-colors hover:border-gold/40">
+    <Link to="/surah/$id" params={{ id: String(pos.s) }} hash={`a${pos.a}`} className="surface flex items-center gap-3 p-3 transition-colors hover:border-gold/40">
       <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground">{icon}</span>
       <div className="min-w-0 flex-1">
         <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</div>
