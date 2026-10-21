@@ -1,6 +1,18 @@
 import { useSyncExternalStore } from "react";
 
 export type Lang = "fr" | "en" | "ar";
+export type SessionRecord = {
+  id: string;
+  date: number; // timestamp ms
+  surah: number;
+  from: number;
+  to: number;
+  correct: number;
+  close: number;
+  wrong: number;
+  missed: number;
+  seconds: number;
+};
 export type AppState = {
   v: 1;
   lang: Lang;
@@ -21,6 +33,8 @@ export type AppState = {
   searchHistory: string[];
   stats: { sessions: number; surahsOpened: number[] };
   lastPage: number;
+  memorizedAyahs: string[]; // "surah:ayah"
+  sessions: SessionRecord[];
 };
 
 const KEY = "cpf.state";
@@ -44,6 +58,8 @@ export const defaultState: AppState = {
   searchHistory: [],
   stats: { sessions: 0, surahsOpened: [] },
   lastPage: 1,
+  memorizedAyahs: [],
+  sessions: [],
 };
 
 let state: AppState = defaultState;
@@ -116,7 +132,7 @@ const uniq = <T,>(list: T[] | undefined): T[] => Array.from(new Set(Array.isArra
 export function dedupe(s: AppState): AppState {
   const fav: Record<string, number[]> = {};
   for (const [k, v] of Object.entries(s.favoriteSurahs ?? {})) fav[k] = uniq(v);
-  return { ...s, favoriteSurahs: fav, favorites: uniq(s.favorites), bookmarks: uniq(s.bookmarks), favoriteReciters: uniq(s.favoriteReciters), playlist: uniq(s.playlist) };
+  return { ...s, favoriteSurahs: fav, favorites: uniq(s.favorites), bookmarks: uniq(s.bookmarks), favoriteReciters: uniq(s.favoriteReciters), playlist: uniq(s.playlist), memorizedAyahs: uniq(s.memorizedAyahs) };
 }
 
 /** Adds the surah to the playlist with this reciter, re-assigns it, or removes it when already set to this reciter. */

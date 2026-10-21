@@ -55,3 +55,10 @@ export function juzAtPage(page: number): number {
   for (let i = 0; i < JUZ_START_PAGE.length; i++) if (JUZ_START_PAGE[i]! <= page) j = i + 1;
   return j;
 }
+
+// Start point (surah, ayah) of each juz (1..30) and hizb (1..60) — Madani mushaf.
+export const JUZ_START: [number, number][] = [[1, 1], [2, 142], [2, 253], [3, 93], [4, 24], [4, 148], [5, 82], [6, 111], [7, 88], [8, 41], [9, 93], [11, 6], [12, 53], [15, 1], [17, 1], [18, 75], [21, 1], [23, 1], [25, 21], [27, 56], [29, 46], [33, 31], [36, 28], [39, 32], [41, 47], [46, 1], [51, 31], [58, 1], [67, 1], [78, 1]];
+export const HIZB_START: [number, number][] = [[1, 1], [2, 75], [2, 142], [2, 203], [2, 253], [3, 15], [3, 93], [3, 171], [4, 24], [4, 88], [4, 148], [5, 27], [5, 82], [6, 36], [6, 111], [7, 1], [7, 88], [7, 171], [8, 41], [9, 34], [9, 93], [10, 26], [11, 6], [11, 84], [12, 53], [13, 19], [15, 1], [16, 51], [17, 1], [17, 99], [18, 75], [20, 1], [21, 1], [22, 1], [23, 1], [24, 21], [25, 21], [26, 111], [27, 56], [28, 51], [29, 46], [31, 22], [33, 31], [34, 24], [36, 28], [37, 145], [39, 32], [40, 41], [41, 47], [43, 24], [46, 1], [48, 18], [51, 31], [55, 1], [58, 1], [62, 1], [67, 1], [72, 1], [78, 1], [87, 1]];
+
+export const juzOf = (s: number, a: number) => { let j = 1; for (let i = 0; i < JUZ_START.length; i++) { const [js, ja] = JUZ_START[i]!; if (js < s || (js === s && ja <= a)) j = i + 1; } return j; };
+export const hizbOf = (s: number, a: number) => { let h = 1; for (let i = 0; i < HIZB_START.length; i++) { const [hs, ha] = HIZB_START[i]!; if (hs < s || (hs === s && ha <= a)) h = i + 1; } return h; };

@@ -4,7 +4,7 @@ import { MemorizeMushaf } from "@/components/MemorizeMushaf";
 export const Route = createFileRoute("/hifz")({
   head: () => ({
     meta: [
-      { title: "Mémorisation (Mushaf) — CoranProFree" },
+      { title: "Mémorisation et récitation guidée — CoranProFree" },
       { name: "description", content: "Récitez de mémoire : les versets sont floutés et se révèlent un à un, synchronisés avec la récitation audio." },
     ],
   }),
