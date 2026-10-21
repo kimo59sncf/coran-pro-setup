@@ -177,41 +177,32 @@ export function MemorizeMushaf() {
 
   return (
     <div className="pb-4">
-      {/* Sélecteurs de départ (Sourate / Juz / Hizb) */}
-      <div className="px-5 pb-3 pt-6">
+      {/* Barre de navigation collante : micro + sélecteurs + navigation, toujours visible */}
+      <div className="sticky top-0 z-30 border-y bg-background/95 px-4 py-2 backdrop-blur">
         <div className="flex items-center gap-2">
-          <select value={s} onChange={(e) => { saveSession(); setS(Number(e.target.value)); setFocus(1); }} aria-label={t("surah")} className="min-h-11 min-w-0 flex-1 rounded-xl border bg-card px-3 text-sm">
-            {SURAHS.map((x) => <option key={x.n} value={x.n}>{num(x.n)}. {surahName(x, lang)}</option>)}
-          </select>
+          <button onClick={() => (listening ? stopRecite() : startRecite())} aria-label={listening ? t("stopReciting") : t("startReciting")} className={`grid h-11 w-11 shrink-0 place-items-center rounded-full transition-colors ${listening ? "bg-destructive text-destructive-foreground" : "bg-gold text-gold-foreground shadow-gold"}`}>
+            {listening ? <Square className="h-5 w-5" fill="currentColor" /> : <Mic className="h-5 w-5" />}
+          </button>
+          <div className="min-w-0 flex-1 text-center">
+            <div className="text-sm font-semibold">{t("ayah")} {num(focus)} <span className="font-normal text-muted-foreground">/ {num(total)}</span></div>
+            <div className="text-xs text-muted-foreground">{listening ? <span className="font-medium text-gold">{t("listening")}…</span> : "\u00A0"}</div>
+          </div>
+          <button onClick={() => advance(-1)} aria-label={t("prev")} title={t("prev")} className="chip"><ChevronLeft className="h-4 w-4 rtl:rotate-180" /></button>
+          <button onClick={() => advance(1)} aria-label={t("nextAyah")} title={t("nextAyah")} className="chip"><ChevronRight className="h-4 w-4 rtl:rotate-180" /></button>
           <button onClick={() => setShowHistory(true)} aria-label={t("history")} title={t("history")} className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border bg-card text-muted-foreground transition-colors hover:text-foreground">
             <History className="h-5 w-5" />
           </button>
         </div>
-        <div className="mt-2 grid grid-cols-2 gap-2">
-          <select value={juzOf(s, focus)} onChange={(e) => { saveSession(); const [js, ja] = JUZ_START[Number(e.target.value) - 1]!; setS(js); setFocus(ja); }} aria-label={t("juz")} className="min-h-11 min-w-0 rounded-xl border bg-card px-3 text-sm">
+        <div className="mt-2 grid grid-cols-[1.5fr_1fr_1fr] gap-2">
+          <select value={s} onChange={(e) => { saveSession(); setS(Number(e.target.value)); setFocus(1); }} aria-label={t("surah")} className="min-h-11 min-w-0 rounded-xl border bg-card px-2 text-sm">
+            {SURAHS.map((x) => <option key={x.n} value={x.n}>{num(x.n)}. {surahName(x, lang)}</option>)}
+          </select>
+          <select value={juzOf(s, focus)} onChange={(e) => { saveSession(); const [js, ja] = JUZ_START[Number(e.target.value) - 1]!; setS(js); setFocus(ja); }} aria-label={t("juz")} className="min-h-11 min-w-0 rounded-xl border bg-card px-2 text-sm">
             {JUZ_START.map((_, i) => <option key={i} value={i + 1}>{t("juz")} {num(i + 1)}</option>)}
           </select>
-          <select value={hizbOf(s, focus)} onChange={(e) => { saveSession(); const [hs, ha] = HIZB_START[Number(e.target.value) - 1]!; setS(hs); setFocus(ha); }} aria-label={t("hizb")} className="min-h-11 min-w-0 rounded-xl border bg-card px-3 text-sm">
+          <select value={hizbOf(s, focus)} onChange={(e) => { saveSession(); const [hs, ha] = HIZB_START[Number(e.target.value) - 1]!; setS(hs); setFocus(ha); }} aria-label={t("hizb")} className="min-h-11 min-w-0 rounded-xl border bg-card px-2 text-sm">
             {HIZB_START.map((_, i) => <option key={i} value={i + 1}>{t("hizb")} {num(i + 1)}</option>)}
           </select>
-        </div>
-      </div>
-
-      {/* Barre de contrôle collante : micro + navigation, toujours visible pendant le défilement */}
-      <div className="sticky top-0 z-30 border-y bg-background/95 px-5 py-2 backdrop-blur">
-        <div className="flex items-center gap-2">
-          <button onClick={() => (listening ? stopRecite() : startRecite())} aria-label={listening ? t("stopReciting") : t("startReciting")} className={`grid h-12 w-12 shrink-0 place-items-center rounded-full transition-colors ${listening ? "bg-destructive text-destructive-foreground" : "bg-gold text-gold-foreground shadow-gold"}`}>
-            {listening ? <Square className="h-5 w-5" fill="currentColor" /> : <Mic className="h-5 w-5" />}
-          </button>
-          <div className="min-w-0 flex-1">
-            <div className="truncate text-sm font-semibold">{num(s)}. {info ? surahName(info, lang) : ""}</div>
-            <div className="text-xs text-muted-foreground">
-              {t("ayah")} {num(focus)} / {num(total)}
-              {listening && <span className="font-medium text-gold"> · {t("listening")}…</span>}
-            </div>
-          </div>
-          <button onClick={() => advance(-1)} aria-label={t("prev")} title={t("prev")} className="chip"><ChevronLeft className="h-4 w-4 rtl:rotate-180" /></button>
-          <button onClick={() => advance(1)} aria-label={t("nextAyah")} title={t("nextAyah")} className="chip"><ChevronRight className="h-4 w-4 rtl:rotate-180" /></button>
         </div>
         {err && <p className="mt-1 text-xs text-destructive">{err}</p>}
       </div>
@@ -224,7 +215,7 @@ export function MemorizeMushaf() {
             const isFocus = a.n === focus;
             const isRevealed = manualReveal.has(a.n);
             return (
-              <div key={a.n} ref={(el) => { ayahRefs.current[a.n] = el; }} className={`flex scroll-mt-24 items-start gap-2 rounded-xl px-2 py-2 transition-colors ${isFocus ? "bg-gold/10" : ""}`}>
+              <div key={a.n} ref={(el) => { ayahRefs.current[a.n] = el; }} className={`flex scroll-mt-32 items-start gap-2 rounded-xl px-2 py-2 transition-colors ${isFocus ? "bg-gold/10" : ""}`}>
                 <button onClick={() => toggleReveal(a.n)} aria-label={isRevealed ? t("hideAyah") : t("revealAyah")} title={isRevealed ? t("hideAyah") : t("revealAyah")} className={`mt-2 grid h-9 w-9 shrink-0 place-items-center rounded-full border ${isRevealed ? "border-gold/60 text-gold" : "border-border text-muted-foreground"}`}>
                   {isRevealed ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
