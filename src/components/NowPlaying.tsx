@@ -66,7 +66,7 @@ export function MiniPlayer() {
               <span className="block truncate text-xs text-muted-foreground">{reciterName} · {t("ayah")} {num(tr.a)}{p.error && ` · ${t("error")}`}</span>
             </span>
           </button>
-          <button aria-label={t("openPlayer")} title={t("openPlayer")} onClick={() => setOpen(true)} className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-gold text-gold-foreground shadow-gold transition-transform active:scale-95">
+          <button aria-label={t("openPlayer")} title={t("openPlayer")} onClick={() => setOpen(true)} className="hidden h-11 w-11 shrink-0 place-items-center rounded-full bg-gold text-gold-foreground shadow-gold transition-transform active:scale-95 sm:grid">
             <TrebleClef className="h-5 w-5" />
           </button>
           <Button size="icon" variant="ghost" aria-label={t("prev")} onClick={p.prev}><SkipBack className="rtl:rotate-180" /></Button>
@@ -74,7 +74,7 @@ export function MiniPlayer() {
             {p.error ? <RotateCw className="h-5 w-5" /> : p.playing ? <Pause className="h-5 w-5" fill="currentColor" /> : <Play className="h-5 w-5 translate-x-px" fill="currentColor" />}
           </button>
           <Button size="icon" variant="ghost" aria-label={t("next")} onClick={p.next}><SkipForward className="rtl:rotate-180" /></Button>
-          <Button size="icon" variant="ghost" aria-label={t("nextSurah")} title={t("nextSurah")} onClick={p.nextSurah}><ChevronsRight className="rtl:rotate-180" /></Button>
+          <Button size="icon" variant="ghost" aria-label={t("nextSurah")} title={t("nextSurah")} onClick={p.nextSurah} className="hidden sm:inline-flex"><ChevronsRight className="rtl:rotate-180" /></Button>
           <Button size="icon" variant="ghost" aria-label={t("close")} onClick={p.stop} className="hidden sm:inline-flex"><X /></Button>
         </div>
         <div className="relative h-1 bg-foreground/10"><div className="h-full bg-gold transition-[width]" style={{ width: `${p.progress * 100}%` }} /></div>
