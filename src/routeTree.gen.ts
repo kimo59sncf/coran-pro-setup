@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as FavoritesRouteImport } from './routes/favorites'
+import { Route as HifzRouteImport } from './routes/hifz'
 import { Route as MushafRouteImport } from './routes/mushaf'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ReciteRouteImport } from './routes/recite'
@@ -30,6 +31,11 @@ const IndexRoute = IndexRouteImport.update({
 const FavoritesRoute = FavoritesRouteImport.update({
   id: '/favorites',
   path: '/favorites',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HifzRoute = HifzRouteImport.update({
+  id: '/hifz',
+  path: '/hifz',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MushafRoute = MushafRouteImport.update({
@@ -87,6 +93,7 @@ const ApiPublicReciteTranscribeRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/favorites': typeof FavoritesRoute
+  '/hifz': typeof HifzRoute
   '/mushaf': typeof MushafRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/recite': typeof ReciteRoute
@@ -101,6 +108,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/favorites': typeof FavoritesRoute
+  '/hifz': typeof HifzRoute
   '/mushaf': typeof MushafRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/recite': typeof ReciteRoute
@@ -116,6 +124,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/favorites': typeof FavoritesRoute
+  '/hifz': typeof HifzRoute
   '/mushaf': typeof MushafRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/recite': typeof ReciteRoute
@@ -132,6 +141,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/favorites'
+    | '/hifz'
     | '/mushaf'
     | '/privacy'
     | '/recite'
@@ -146,6 +156,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/favorites'
+    | '/hifz'
     | '/mushaf'
     | '/privacy'
     | '/recite'
@@ -160,6 +171,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/favorites'
+    | '/hifz'
     | '/mushaf'
     | '/privacy'
     | '/recite'
@@ -175,6 +187,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   FavoritesRoute: typeof FavoritesRoute
+  HifzRoute: typeof HifzRoute
   MushafRoute: typeof MushafRouteWithChildren
   PrivacyRoute: typeof PrivacyRoute
   ReciteRoute: typeof ReciteRoute
@@ -200,6 +213,13 @@ declare module '@tanstack/react-router' {
       path: '/favorites'
       fullPath: '/favorites'
       preLoaderRoute: typeof FavoritesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hifz': {
+      id: '/hifz'
+      path: '/hifz'
+      fullPath: '/hifz'
+      preLoaderRoute: typeof HifzRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mushaf': {
@@ -289,6 +309,7 @@ const MushafRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   FavoritesRoute: FavoritesRoute,
+  HifzRoute: HifzRoute,
   MushafRoute: MushafRouteWithChildren,
   PrivacyRoute: PrivacyRoute,
   ReciteRoute: ReciteRoute,

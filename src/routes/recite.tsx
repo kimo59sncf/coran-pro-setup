@@ -1,10 +1,12 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, Mic, Square, RotateCcw, Volume2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Eye, EyeOff, Mic, Square, RotateCcw, Volume2 } from "lucide-react";
 import { PageHeader } from "@/components/AppShell";
 import { useT } from "@/lib/i18n";
 import { useStore } from "@/lib/store";
+import { usePlayer } from "@/lib/player-context";
+import { MemorizeMushaf } from "@/components/MemorizeMushaf";
 import { SURAHS, surah, surahName, surahQuery } from "@/lib/quran";
 import { accuracy, alignRecitation, splitWords, type WordResult } from "@/lib/recitation";
 import { startRecorder, type Recorder } from "@/lib/recorder";
@@ -51,12 +53,22 @@ async function transcribe(file: File, signal?: AbortSignal): Promise<string> {
 function RecitePage() {
   const { t, num, lang } = useT();
   const reciter = useStore((s) => s.reciter);
+  const player = usePlayer();
   const search = Route.useSearch();
   const [s, setS] = useState(search.s ?? 1);
   const [a, setA] = useState(search.a ?? 1);
+  const [showTr, setShowTr] = useState(true);
+  const [mode, setMode] = useState<"coach" | "mushaf">("coach");
   const q = useQuery(surahQuery(s, lang, reciter));
   const ayah = q.data?.find((x) => x.n === a);
   const words = useMemo(() => (ayah ? splitWords(ayah.ar) : []), [ayah]);
+
+  const playModel = () => {
+    if (!q.data) return;
+    const tracks = q.data.map((x) => ({ s, a: x.n, url: x.audio }));
+    const idx = Math.max(0, q.data.findIndex((x) => x.n === a));
+    player.playQueue(tracks, idx);
+  };
 
   const [phase, setPhase] = useState<"idle" | "listening" | "analyzing" | "done">("idle");
   const [heard, setHeard] = useState("");
@@ -67,6 +79,9 @@ function RecitePage() {
   const busy = useRef(false);
   const stopped = useRef(true);
   const abort = useRef<AbortController | null>(null);
+  const cleanupTimers = useRef<() => void>(() => {});
+  const sr = useRef<{ stop: () => void } | null>(null);
+  const srActive = useRef(false);
 
   const results = useMemo(() => alignRecitation(words, heard, phase === "done"), [words, heard, phase]);
   const score = accuracy(results);
@@ -74,25 +89,62 @@ function RecitePage() {
 
   const reset = () => { setHeard(""); setErr(null); setPhase("idle"); setElapsed(0); };
   useEffect(() => { void stop(true); reset(); }, [s, a]); // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => () => { stopped.current = true; abort.current?.abort(); void rec.current?.stop(); }, []);
+  useEffect(() => () => { stopped.current = true; abort.current?.abort(); sr.current?.stop(); void rec.current?.stop(); }, []);
 
   async function start() {
     reset();
+    stopped.current = false;
+    setPhase("listening");
+
+    // Mic level meter (visual feedback only).
     try {
       rec.current = await startRecorder();
     } catch {
-      setErr(t("micDenied")); return;
+      stopped.current = true;
+      setPhase("idle");
+      setErr(t("micDenied"));
+      return;
     }
-    stopped.current = false;
-    abort.current = new AbortController();
-    setPhase("listening");
+
     const t0 = Date.now();
-    const tick = async () => {
-      if (stopped.current || !rec.current) return;
-      setLevel(rec.current.level());
+    const meter = window.setInterval(() => {
+      if (stopped.current) return;
+      setLevel(rec.current?.level() ?? 0);
       const sec = (Date.now() - t0) / 1000;
       setElapsed(sec);
-      if (sec >= MAX_SECONDS) { void stop(); return; }
+      if (sec >= MAX_SECONDS) void stop();
+    }, 100);
+
+    // Prefer the browser's Web Speech API: live Arabic transcription, no server/key.
+    const SR = (typeof window !== "undefined" ? (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition : null);
+    if (SR) {
+      const r = new SR();
+      r.lang = "ar-SA";
+      r.continuous = true;
+      r.interimResults = true;
+      r.onresult = (e: any) => {
+        if (stopped.current) return;
+        let text = "";
+        for (let i = e.resultIndex; i < e.results.length; i++) text += e.results[i][0].transcript;
+        setHeard(text);
+      };
+      r.onerror = (e: any) => {
+        if (e?.error === "not-allowed" || e?.error === "service-not-allowed") setErr(t("micDenied"));
+      };
+      r.onend = () => { if (!stopped.current) { try { r.start(); } catch { /* ignore */ } } };
+      sr.current = r;
+      srActive.current = true;
+      cleanupTimers.current = () => clearInterval(meter);
+      try { r.start(); } catch { setErr(t("micDenied")); }
+      return;
+    }
+
+    // Fallback: server transcription (requires LOVABLE_API_KEY on the backend).
+    srActive.current = false;
+    abort.current = new AbortController();
+    const snapTick = async () => {
+      if (stopped.current || !rec.current) return;
+      const sec = (Date.now() - t0) / 1000;
       if (!busy.current && sec > 1.5) {
         const f = rec.current.snapshot();
         if (f) {
@@ -104,20 +156,26 @@ function RecitePage() {
         }
       }
     };
-    const id = window.setInterval(() => void tick(), 1800);
-    const meter = window.setInterval(() => rec.current && setLevel(rec.current.level()), 100);
-    cleanupTimers.current = () => { clearInterval(id); clearInterval(meter); };
+    const snapTimer = window.setInterval(() => void snapTick(), 1800);
+    cleanupTimers.current = () => { clearInterval(meter); clearInterval(snapTimer); };
   }
-  const cleanupTimers = useRef<() => void>(() => {});
 
   async function stop(silent = false) {
     if (stopped.current) return;
     stopped.current = true;
     cleanupTimers.current();
     abort.current?.abort();
+    sr.current?.stop();
+    sr.current = null;
     const f = await rec.current?.stop();
     rec.current = null;
     setLevel(0);
+    // Web Speech API already produced the transcript live.
+    if (srActive.current) {
+      srActive.current = false;
+      if (!silent) setPhase("done");
+      return;
+    }
     if (silent || !f) { if (!silent) setPhase("idle"); return; }
     setPhase("analyzing");
     try {
@@ -138,11 +196,29 @@ function RecitePage() {
   };
   const listening = phase === "listening";
 
+  const toggleBar = (
+    <div className="flex gap-2 px-5 pb-2">
+      <button onClick={() => setMode("coach")} aria-pressed={mode === "coach"} className="chip">{t("reciteTitle")}</button>
+      <button onClick={() => setMode("mushaf")} aria-pressed={mode === "mushaf"} className="chip">{t("hifz")}</button>
+    </div>
+  );
+
+  if (mode === "mushaf") {
+    return (
+      <div>
+        <PageHeader title={t("hifz")} />
+        {toggleBar}
+        <MemorizeMushaf />
+      </div>
+    );
+  }
+
   return (
     <div>
       <PageHeader title={t("reciteTitle")}>
         <p className="mt-1 text-sm text-muted-foreground">{t("reciteIntro")}</p>
       </PageHeader>
+      {toggleBar}
       <div className="space-y-4 px-5">
         <div className="surface flex flex-wrap items-center gap-3 p-3">
           <label className="sr-only" htmlFor="rs">{t("surah")}</label>
@@ -154,6 +230,8 @@ function RecitePage() {
             <span className="min-w-20 text-center text-sm font-semibold">{t("ayah")} {num(a)}/{num(total)}</span>
             <button onClick={() => go(1)} aria-label={t("next")} className="grid h-11 w-11 place-items-center rounded-full border"><ChevronRight className="h-5 w-5 rtl:rotate-180" /></button>
           </div>
+          <button onClick={playModel} disabled={!ayah} aria-label={t("listenModel")} title={t("listenModel")} className="grid h-11 w-11 place-items-center rounded-full border"><Volume2 className="h-5 w-5" /></button>
+          <button onClick={() => setShowTr((v) => !v)} aria-pressed={showTr} aria-label={t("translation")} title={t("translation")} className={`grid h-11 w-11 place-items-center rounded-full border ${showTr ? "text-gold" : "text-muted-foreground"}`}>{showTr ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}</button>
         </div>
 
         <section className="surface relative overflow-hidden p-6">
@@ -170,7 +248,7 @@ function RecitePage() {
                 ))}
                 <span className="mx-1 text-gold">۝{num(a)}</span>
               </p>
-              {ayah.tr && lang !== "ar" && <p className="mt-4 text-center text-sm text-muted-foreground">{ayah.tr}</p>}
+              {showTr && ayah.tr && lang !== "ar" && <p className="mt-4 text-center text-sm text-muted-foreground">{ayah.tr}</p>}
             </>
           )}
         </section>
@@ -225,7 +303,7 @@ function RecitePage() {
             <div className="flex flex-wrap gap-2">
               <button onClick={() => void start()} className="chip"><RotateCcw className="h-4 w-4" /> {t("tryAgain")}</button>
               <button onClick={() => go(1)} className="chip">{t("nextAyah")} <ChevronRight className="h-4 w-4 rtl:rotate-180" /></button>
-              <Link to="/surah/$id" params={{ id: String(s) }} hash={`a${a}`} className="chip"><Volume2 className="h-4 w-4" /> {t("listenModel")}</Link>
+              <button onClick={playModel} className="chip"><Volume2 className="h-4 w-4" /> {t("listenModel")}</button>
             </div>
           </section>
         )}

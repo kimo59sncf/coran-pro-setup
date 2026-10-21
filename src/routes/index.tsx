@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { BookOpen, ChevronDown, ChevronLeft, Headphones, ListMusic, Play, Shuffle, Mic } from "lucide-react";
+import { BookOpen, ChevronDown, ChevronLeft, Eye, Headphones, ListMusic, Play, Shuffle, Mic } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { favoriteSurahsOf, setState, useStore } from "@/lib/store";
 import { useDownloadedSurahs } from "@/lib/downloads";
@@ -78,6 +78,9 @@ function Home() {
           </Link>
           <Link to="/recite" className="inline-flex items-center gap-2 min-h-11 rounded-full bg-foreground/15 px-5 text-sm font-semibold backdrop-blur-sm transition-colors hover:bg-foreground/25">
             <Mic className="h-4 w-4" /> {t("recite")}
+          </Link>
+          <Link to="/hifz" className="inline-flex items-center gap-2 min-h-11 rounded-full bg-foreground/15 px-5 text-sm font-semibold backdrop-blur-sm transition-colors hover:bg-foreground/25">
+            <Eye className="h-4 w-4" /> {t("hifz")}
           </Link>
         </div>
       </section>
