@@ -39,6 +39,7 @@ export function MemorizeMushaf() {
   const resultCountRef = useRef(0);
   const sessionRef = useRef({ start: Date.now(), from: 1, to: 1, correct: 0, close: 0, wrong: 0, missed: 0, completed: 0 });
   const prevStatusRef = useRef<Record<number, string>>({});
+  const ayahRefs = useRef<Record<number, HTMLDivElement | null>>({});
   const sessions = useStore((st) => st.sessions);
   const memorizedAyahs = useStore((st) => st.memorizedAyahs);
 
@@ -51,6 +52,11 @@ export function MemorizeMushaf() {
 
   // Reset on surah change (focus is set explicitly by the selectors/jump).
   useEffect(() => { setHeard(""); setManualReveal(new Set()); setErr(null); }, [s]);
+  // Scroll to the focus ayah when it changes (Juz/Hizb/Surah selection or advance).
+  useEffect(() => {
+    const el = ayahRefs.current[focus];
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [focus, s, q.data]); // eslint-disable-line react-hooks/exhaustive-deps
   // Cleanup on unmount.
   useEffect(() => () => { stoppedRef.current = true; srRef.current?.stop(); }, []);
 
@@ -206,7 +212,7 @@ export function MemorizeMushaf() {
             const isFocus = a.n === focus;
             const isRevealed = manualReveal.has(a.n);
             return (
-              <div key={a.n} className={`flex items-start gap-2 rounded-xl px-2 py-2 transition-colors ${isFocus ? "bg-gold/10" : ""}`}>
+              <div key={a.n} ref={(el) => { ayahRefs.current[a.n] = el; }} className={`flex items-start gap-2 rounded-xl px-2 py-2 transition-colors ${isFocus ? "bg-gold/10" : ""}`}>
                 <button onClick={() => toggleReveal(a.n)} aria-label={isRevealed ? t("hideAyah") : t("revealAyah")} title={isRevealed ? t("hideAyah") : t("revealAyah")} className={`mt-2 grid h-9 w-9 shrink-0 place-items-center rounded-full border ${isRevealed ? "border-gold/60 text-gold" : "border-border text-muted-foreground"}`}>
                   {isRevealed ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
