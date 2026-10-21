@@ -25,6 +25,14 @@ export const RECITERS = [
   { id: "ar.abdullahbasfar", name: "Abdullah Basfar", ar: "عبد الله بصفر" },
   { id: "ar.muhammadayyoub", name: "Muhammad Ayyoub", ar: "محمد أيوب" },
   { id: "ar.muhammadjibreel", name: "Muhammad Jibreel", ar: "محمد جبريل" },
+  { id: "ar.shaatree", name: "Abu Bakr Ash-Shaatree", ar: "أبو بكر الشاطري" },
+  { id: "ar.hudhaify", name: "Ali Al-Hudhaify", ar: "علي الحذيفي" },
+  { id: "ar.hanirifai", name: "Hani Rifai", ar: "هاني الرفاعي" },
+  { id: "ar.husarymujawwad", name: "Mahmoud Al-Husary (Mujawwad)", ar: "محمود خليل الحصري (المجود)" },
+  { id: "ar.minshawimujawwad", name: "Mohamed Al-Minshawi (Mujawwad)", ar: "محمد صديق المنشاوي (المجود)" },
+  { id: "ar.abdulsamad", name: "Abdul Basit (Mujawwad)", ar: "عبد الباسط عبد الصمد (مجود)" },
+  { id: "ar.aymanswoaid", name: "Ayman Sowaid", ar: "أيمن سويد" },
+  { id: "ar.ibrahimakhbar", name: "Ibrahim Akhdar", ar: "إبراهيم الأخضر" },
 ];
 
 export type Ayah = { n: number; global: number; ar: string; tr?: string; audio: string; page?: number };
